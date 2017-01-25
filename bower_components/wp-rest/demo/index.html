@@ -1,0 +1,101 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, minimum-scale=1, initial-scale=1, user-scalable=yes">
+
+    <title>wp-rest demo</title>
+
+    <script src="../../webcomponentsjs/webcomponents-lite.js"></script>
+    <script src="../../../creds.js"></script>
+    
+    <link rel="import" href="../../iron-demo-helpers/demo-pages-shared-styles.html">
+    <link rel="import" href="../../iron-demo-helpers/demo-snippet.html">
+    
+    <link rel="import" href="../wp-rest.html">
+    <link rel="import" href="../wp-rest-resource.html">
+  
+    <style is="custom-style" include="demo-pages-shared-styles">
+    :host{
+      width:100%;
+      display:block;
+    }
+    #posts,#discovery,wp-rest,wp-rest-resource,wp-rest-document{
+      width:100%;
+      display:block;
+    }
+    .prop{
+      width:100%;
+      display:block;
+      @apply(--layout-horizontal)
+    }
+    .propname{
+      width:20%;
+    }
+    .proptype{
+      width:20%;
+    }
+    .propdesc{
+      width:60%;
+    }
+    </style>
+  </head>
+  <body>
+    <div class="vertical-section-container centered">
+      <h3>Basic wp-rest demo</h3>
+      <demo-snippet >
+        <template id="snippet" is="dom-bind">
+          
+          <wp-rest id="wpRest" host="{{apiHost}}" namespace="{{apiNamespace}}" auth-key="{{authKey}}" auth-secret="{{authSecret}}"></wp-rest>
+          <wp-rest-resource auto-load id="postsResource" resource="posts" last-response="{{postsResults}}" last-error="{{postsError}}" last-discovery="{{postsDiscovery}}"></wp-rest-resource>
+          <wp-rest-document auto-load id="postDocument"  resource="posts" resource-id="{{postsResults.0.id}}" last-response="{{postResult}}" last-error="{{postError}}" last-discovery="{{postDiscovery}}"></wp-rest-document>
+          
+          <div id="posts">
+          <template is="dom-repeat" items="{{postsResults}}" as="post">
+            <p>{{post.title.rendered}}</p>
+            <paper-button on-tap="__editPost"></paper-button>
+          </template>
+          </div>
+          <button on-click="__discover">discover</button>
+          <div id="discovery" hidden$="{{!postDiscovery}}">
+            <template is="dom-repeat" items="{{__objToArr(postDiscovery.schema.properties)}}" as="prop">
+              <div class="prop">
+              <div class="propname">{{prop.name}}</div>
+              <div class="proptype">{{prop.type}}</div>
+              <div class="propdesc">{{prop.description}}</div>
+              </div>
+            </template>
+          </div>
+        </template>
+        <script>
+          var demo = document.querySelector('#snippet');
+          demo.apiHost = window.creds.apiHost;
+          demo.apiNamespace = window.creds.apiNamespace;
+          demo.authKey = window.creds.authKey;
+          demo.__editPost = function( event ){
+            var model = event.model;
+            var post = model.post;
+            console.log(post)
+          }
+          demo.getFirstId = function( res ){
+            if(res && res.length) return res[0].id;
+            return null;
+          }
+          demo.__discover = function(){
+            document.querySelector('#postDocument').discover();
+          }
+          demo.__objToArr = function( o ){
+            if(!o) return [];
+            return Object.keys( o ).reduce( function( arr, k ){
+              var p = o[k];
+              p.name= k;
+              arr.push(p);
+              return arr;
+            }, [] )
+          }
+          
+        </script>
+      </demo-snippet>
+    </div>
+  </body>
+</html>

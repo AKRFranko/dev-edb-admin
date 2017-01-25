@@ -1,0 +1,156 @@
+
+<script>
+(function(){
+  if(!window.WPRestConnections){
+    window.WPRestConnections = {};
+  }
+  /**
+  * Wordpress Rest Document Behavior
+  *
+  * @polymerBehavior
+  */
+  window.WPRestDocumentBehavior = {
+    properties: {
+      /**
+       * Name of the connection (falls back to 'default')
+       */
+      connection: {
+        type: String,
+        notify: true,
+        observer: '__connectionChanged'
+      },
+      /**
+      * The Wordpress API connection element reference.
+      */
+      api: { 
+        type: Object, 
+        notify: true
+      },
+      /**
+      * Name fo the resource ex: 'posts'
+      */
+      resource: {
+        type: String,
+        notify: true
+      },
+      /**
+      * ID of the resource document.
+      */
+      resourceId: {
+        type: String,
+        notify: true
+      },
+      /**
+      * Auto load when resourceId changes and/or upon initialization.
+      */
+      autoLoad: {
+        type: Boolean,
+        value: false,
+        notify: true
+      }
+    },
+    observers: ['__autoLoad(resource,resourceId)'],
+    __autoLoad: function(){
+      
+      this.debounce('autoload', function(){
+      if(this.autoLoad && this.resource && ( !!this.resourceId || this.resourceId == 0 ) ){
+        console.log('autoloading', this.resource, this.resourceId);
+        this.read();
+      }  
+      }.bind(this))
+      
+    },
+    __handleSuccess: function( response ){
+      console.log('success', response );
+      this.set('lastResponse', response );
+      this.notifyPath('lastResponse', response )
+    },
+    __handleDiscovery: function( response ){
+      this.set('lastDiscovery', response );
+      this.notifyPath('lastDiscovery', response )
+    },
+    __handleFailure: function( error ){
+      // console.log('failure',error );
+      this.set('lastError', error )
+      this.notifyPath('lastError', error )
+      throw error;
+    },
+    __setApi: function(){
+      if(!this.api){
+        var name = this.connection||'default';
+        this.api = window.WPRestConnections[name];
+      }
+    },
+    __connectionChanged: function( name ){
+      this.__setApi();
+    },
+    __request: function( method, path, data, params ){
+      this.__setApi();
+      
+      return this.api.__request( method, path, data, params ).then( 
+        this.__handleSuccess.bind(this),this.__handleFailure.bind(this));
+    },
+    attached: function(){
+      if(!this.connection) this.connection = 'default';
+      this.__connectionChanged( this.connection );
+    },
+    ready: function(){
+      this.__setApi();
+      this.__autoLoad();
+    },
+    /**
+    * Discover API
+    *
+    * @path {Object} wordpress API query parameters.
+    * @return {Promise} a promise for the results
+    */
+    discover: function(  ){
+      this.__setApi();
+      return this.api.__sendRequest( 'OPTIONS', this.resource + '/' + this.resourceId, null, null  ).then( this.__handleDiscovery.bind(this), this.__handleFailure.bind(this) );
+    },
+    /**
+    * Create a new document.
+    *
+    * @param {data} The document data.
+    * @param {params} wordpress API query parameters.
+    * @return {Promise} a promise for the results
+    */
+    create: function( data, params ){
+      return this.__request( 'POST', this.resource, data, params );
+    },
+    /**
+    * Read current document.
+    *
+    * @param {params} wordpress API query parameters.
+    * @return {Promise} a promise for the results
+    */
+    read: function(  params ){
+      
+      if(!this.resourceId) return Promise.reject('Missing Resource Id').then( null, this.__handleFailure.bind(this));
+      return this.__request( 'GET', this.resource + '/' + this.resourceId , null, params );
+    },
+    
+    /**
+    * Update current document.
+    *
+    * @param {data} the update data..
+    * @param {params} wordpress API query parameters.
+    * @return {Promise} a promise for the results
+    */
+    update: function( data, params ){
+      return this.__request( 'PUT', this.resource + '/' + this.resourceId , data, params );
+    },
+    /**
+    * Delete current document.
+    *
+    * @param {params} wordpress API query parameters.
+    * @return {Promise} a promise for the results
+    */
+    delete: function( params ){
+      return this.__request( 'DELETE', this.resource + '/' + this.resourceId , null, params );
+    }
+   
+  };
+})();
+
+</script>

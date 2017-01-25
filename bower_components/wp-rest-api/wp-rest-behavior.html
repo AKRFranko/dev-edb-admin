@@ -1,0 +1,194 @@
+<script>(function(){
+  if(!window.WPRestConnections){
+    window.WPRestConnections = {};
+  }
+  var joinPath = function(){
+    var parts = Array.prototype.slice.call( arguments );
+    var path =  parts.reduce(function( array, part ){
+      if(part){
+        array.push(part.replace(/^\//,''))
+      }return array;
+    }, []).join('/')
+    
+    return /^http/.test(path) ? path : '/' + path;
+  }
+  var namedConfig = {};
+  /**
+  * Wordpress Rest API Connection Behavior
+  *
+  * @polymerBehavior
+  */
+ 
+  window.WPRestConnectionBehavior = {
+    properties: {
+      /**
+      * Name of the connection.
+      */
+      name: {
+        type: String,
+        notify: true,
+        value: 'default',
+        observer: '__nameChanged'
+      },
+      /**
+      * Host to connect to.
+      */
+      host: { 
+        type: String, 
+        notify: true
+      },
+      /**
+      * Wordpress API namespace
+      */
+      namespace: { 
+        type: String, 
+        notify: true
+      },
+      /**
+      * Wordpress API authentication key.
+      */
+      authKey: { 
+        type: String, 
+        notify: true
+      },
+      /**
+      * Wordpress API authentication secret.
+      */
+      authSecret: { 
+        type: String, 
+        notify: true
+      },
+      /**
+      * Last response results.
+      */
+      lastResponse: {
+        type: Object,
+        notify: true
+      },
+      /**
+      * Last error.
+      */
+      lastError: {
+        type: Object,
+        notify: true
+      },
+      /**
+      * Last discovery results.
+      */
+      lastDiscovery: {
+        type: Object,
+        notify: true
+      },
+      queryString: {
+        
+      }
+    },
+   __getUrl: function( path ){
+     return joinPath( this.host, this.namespace, path );
+   },
+   __getHeaders: function(){
+     var headers = {  'X-Requested-With': 'XMLHttpRequest', 'Content-Type': 'application/json' };
+     headers['Authorization'] = 'Basic ' + window.btoa( this.authKey + ":" + this.authSecret );
+     return headers;
+   },
+    __nameChanged: function( name ){
+      window.WPRestConnections[name] = this;
+    },
+    __handleSuccess: function( response ){
+      
+      this.set('lastResponse', response );
+      return response;
+    },
+    __handleDiscovery: function( response ){
+      // console.log('rest behavior __handleDiscovery', response )
+      this.set('lastDiscovery', response );
+      return response;
+    },
+    __handleFailure: function( error ){
+      this.set('lastError', error )
+      throw error;
+    },
+    __getQueryString: function( params ){
+      if(!params) params = {};
+      if(!params._embed) params._embed = 1;
+      var query,merged;
+      if(this.queryString){
+        query = QSJS().decode( this.queryString );
+        merged = Object.keys( query ).reduce( function( o, k ){
+          o[k] = query[k];
+          return o;
+        }, params );
+      }else{
+        merged = params;
+      }
+      return QSJS().encode( merged );
+    },
+    __sendRequest: function( method, url, data, params ){
+      // console.log('send request')
+      if(!params){
+        params = {'context':'edit'};
+      }
+      // console.log(params, this.queryString)
+      
+      var xhr = document.createElement('iron-request');
+      
+      // var url = this.__getUrl( path );
+      var headers = this.__getHeaders();
+      var body;
+      method = method.toUpperCase();
+      
+      if(data && data.fileData){
+        console.log('hasFileData');
+        headers['Content-Disposition'] = 'attachment; filename="'+data.name+'";';
+        delete(headers['Content-Type']);
+        body = new FormData();
+        body.append('file',data.fileData);
+      }else{
+        body = data ? JSON.stringify(data) : null;
+      }
+      
+      
+      url = url + '?' + this.__getQueryString( params );
+      console.log(url);
+      var request = xhr.send({
+        url: url,
+        method: method,
+        handleAs: 'json',
+        body: body,
+        headers: headers
+      });
+      
+      var promise = function( resolve, reject ){
+        var success = function( xhr ){
+          var response = xhr.response;
+          console.log('resolve request', response )
+          resolve( response );
+          
+        };
+        var failure = function( error ){
+          error = xhr.response || error;
+          console.log('reject request', error)
+          reject( error );
+        };
+        request.then( success.bind(this), failure.bind(this) );
+      }.bind(this);
+      return new Promise( promise );
+    },
+    __request: function( method,path, data, params ){
+      // console.log('api request')
+      
+      var url = path ? this.__getUrl( path ) : joinPath( this.host ); 
+      return this.__sendRequest( method, url, data, params ).then( this.__handleSuccess.bind(this) , this.__handleFailure.bind(this))
+    },
+    discover: function( path ){
+      var url = this.__getUrl( path );
+      return this.__sendRequest( 'options', path||'' ).then( this.__handleDiscovery.bind(this), this.__handleFailure.bind(this) );
+    },
+    attached: function(){
+      if(!this.name){
+        this.name = 'default';
+      }
+    }
+  };
+})();
+</script>

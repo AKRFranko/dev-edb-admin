@@ -1,0 +1,56 @@
+<link rel="import" href="../polymer/polymer.html">
+<link rel="import" href="./wp-rest-document-behavior.html">
+
+<!--
+`<wp-rest-document>` Allows connection to Wordpress REST API
+-->
+
+<dom-module id="wp-rest-document">
+  <template>
+   <style>
+     :host {
+       display: block;
+     }
+     .list{
+       @apply(--layout-vertical)
+     }
+     .label,.value{
+       display:inline-block;
+       width:50%;
+       float:left;
+     }
+     .label{
+       text-align:right;
+     }
+   </style>
+   <!--<h3>wp-rest-document</h3>-->
+   <!--<div class="item">-->
+   <!--  <div class="label">connection: </div>-->
+   <!--  <div class="value">{{connection}}</div>-->
+   <!--</div>-->
+   <!--<div class="item">-->
+   <!--  <div class="label">resource: </div>-->
+   <!--  <div class="value">{{resource}}</div>-->
+   <!--</div>-->
+   <!--<div class="item">-->
+   <!--  <div class="label">resourceId: </div>-->
+   <!--  <div class="value">{{resourceId}}</div>-->
+   <!--</div>-->
+  </template>
+
+  <script>
+  
+    
+    Polymer({
+
+      is: 'wp-rest-document',
+      properties: {
+      },
+      behaviors: [
+        window.WPRestDocumentBehavior
+      ],
+      
+
+    });
+  </script>
+</dom-module>
