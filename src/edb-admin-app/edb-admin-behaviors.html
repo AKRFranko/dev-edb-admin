@@ -559,6 +559,34 @@
   
   EDB.createObject( 
     wpRest, 
+    'Faq', 
+    'faqs',
+    function loadData( data ){
+      if(!data) data = {};
+      var meta_box = data.meta_box||{}; 
+      this.id = data.id == 'new' ? null : data.id;
+      this.image = { src: data.featured_image, id:  data.featured_media };
+      // this.title = splitTranslation(  meta_box ? data.title.rendered  : ''  );
+      // this.content = splitTranslation(  data.content ? data.content.rendered  : ''  );
+      
+      this.feature_url = data.meta_box ? data.meta_box.edb_feature_url : '';
+      
+      return this;
+    },
+    function convertData(  ){
+      // // console.log('convert feature', this );
+      // return {
+      //         id: this.id,
+      //         featured_media: this.image.id,
+      //         title: joinTranslation(this.title),
+      //         content: joinTranslation( this.content ),
+      //         meta_box: { edb_feature_url: this.edb_feature_url }
+      //       }
+    }
+  );
+  
+  EDB.createObject( 
+    wpRest, 
     'Page', 
     'pages',
     function loadData( data ){
