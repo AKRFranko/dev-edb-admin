@@ -314,7 +314,7 @@
                   <p>{{user.email}}</p>
                 </edb-list-item>
               </template>
-              <a href="/#/edit/user/new" hidden$="[[users.length]]">create one</a>
+              
             </edb-list-view>
           </neon-animatable><!-- user mode  -->
           
@@ -411,6 +411,7 @@
                   <div class="meta">sale: {{product.salePrice}}</div>
                 </edb-list-item>
               </template>
+              <a href="/#/edit/product/new" hidden$="[[products.length]]">create one</a>
               <!--<paper-spinner active$="{{!products.length}}"></paper-spinner>-->
             </edb-list-view>
           </neon-animatable><!-- product mode  -->
