@@ -1,0 +1,134 @@
+<link rel="import" href="../../bower_components/polymer/polymer.html">
+<!--<link rel="import" href="./users/edb-user-list.html">-->
+
+<dom-module id="billingual-input">
+  <template>
+    <style>
+      :host {
+        display: block;
+        @apply(--paper-font-caption):
+      }
+      .billingual-input{
+        @apply(--layout-vertical);
+      }
+      paper-input,paper-textarea{
+        width:50%;
+      }
+      .input-fields{
+        display:block;
+        
+      }
+      .input-fields[align="horizontal"]{
+        @apply(--layout-horizontal);
+        
+      }
+      .input-fields paper-textarea{
+        @apply(--layout-flex);
+      }
+      .separator{
+        display:inline-block;
+        width:20px;
+        
+        min-height:100%;
+        /*transform:skewX(-15deg);*/
+        /*margin:auto 10px auto 0;*/
+        background-image:url('data:image/png,%89PNG%0D%0A%1A%0A%00%00%00%0DIHDR%00%00%00%18%00%00%00%18%08%06%00%00%00%E0w%3D%F8%00%00%00%C2IDATHK%ED%92%B1%0D%C20%10E%BF%DD%B8d%04p%13%5D%BA%B0%01%23%C0%26%8C%90%0D%10%A3%B0A6%80T%B6Ry%84L%10%23KFB%28%C6%27%85%88%C6W%DF%BD%E7%FBg%81%95K%AC%CCG%11d%13.%11%FD%3E%A2a%18%9A%AA%AA%1EYrl%60%DF%C0Z%7B%06p%89sNJy%E2%88X%82%0F%F8%EB%F1%A3%F7~_%D7%B5%FB%B6%0DW%E0%13%90%1B%11%1D%17%09B%E6%D34%DD%13%90%9E%88%9AE%820l%8CqB%88%ED%0C%E8JD%E16%C9bE%14%B7%E8%00l%DEH%BDR%EA%A0%B5%1E%17%0B%02%20JZ%00%3B%00%9DR%AA%CD%C1%C3%1Ck%03%EE%9F%9F%EB%2B%82lz%25%A2%FFG%F4%04%DE%EA7%19%BE6%F2%06%00%00%00%00IEND%AEB%60%82');
+        background-repeat:repeat-y;
+        background-position:center 9px;
+        
+        /*padding-right:10px;*/
+        
+      }
+      .input-fields[align="vertical"]{
+        @apply(--layout-vertical);
+      }
+     
+    </style>
+    <div class="billingual-input">
+      <iron-label class="input-label" for="firstInput"></iron-label>
+      <div class="input-fields" align$="{{align}}">
+      <template is="dom-if" if="{{_isType(type,'text')}}">
+          <paper-input id="firstInput" type="text" no-label-float label="english" value="{{data.en::input}}"></paper-input>
+          <div class="separator"></div>
+          <paper-input type="text" no-label-float label="francais" value="{{data.fr::input}}"></paper-input>
+      </template>
+      
+      <template is="dom-if" if="{{_isType(type,'textarea')}}">
+          <paper-textarea id="firstInput" type="text" no-label-float label="english" value="{{data.en::input}}"></paper-textarea>
+          <div class="separator"></div>
+          <paper-textarea type="text" no-label-float label="francais" value="{{data.fr::input}}"></paper-textarea>
+      </template>
+      </div>
+    </div>
+    
+  </template>
+    
+    
+    
+    
+  <script>
+  
+    Polymer({
+      is: 'billingual-input',
+      properties: {
+        type: {
+          type: String,
+          notify: true,
+          value: 'text'
+          
+        },
+        align: {
+          type: String,
+          notify: true,
+          value:'horizontal'
+        },
+        value: {
+          type: String,
+          notify: true
+        },
+        data: {
+          type: Object,
+          notify: true,
+          value: function(){
+            return {en: null, fr: null }
+          }
+        }
+      },
+      observers: ['_dataChanged(data.en,data.fr)','_valueChanged(value)'],
+      _valueChanged: function(value){
+        // console.log(value)
+      },
+      _dataChanged: function( en, fr ){
+        if(en || fr){
+          this.set('value', '{:en}'+(en||'').trim()+'{:}{:fr}'+(fr||'').trim()+'{:}');  
+        }
+        if(!en && !fr){
+          this.set('value', null );
+        }
+        if(this.type == 'textarea'){
+          this._syncronizeRows();
+        }
+      },
+      _syncronizeRows: function(){
+        var ta = this.querySelectorAll('paper-textarea');
+        if(ta.length){
+          var talengthA = ta[0].value ? ta[0].value.split('\n').length : 0;
+          var talengthB = ta[1].value ? ta[1].value.split('\n').length : 0;
+          ta[0].rows = Math.max(talengthA,talengthB);
+          ta[1].rows = Math.max(talengthA,talengthB);
+        }
+      },
+      _isType: function(type,expected){
+        return type == expected;
+      },
+      ready: function(){
+        
+        // Array.prototype.slice.call(this.attributes).forEach( function(a){
+          
+        //   console.log(a.name)
+        //   console.log(a.value)
+        // })
+      }
+    });
+  </script>
+</dom-module>

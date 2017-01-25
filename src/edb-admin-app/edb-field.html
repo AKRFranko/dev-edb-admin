@@ -1,0 +1,598 @@
+<link rel="import" href="../../bower_components/polymer/polymer.html">
+<!--<link rel="import" href="./users/edb-user-list.html">-->
+
+<dom-module id="edb-field">
+  <template>
+    <style include="edb-admin-styles"></style>
+    <style>
+      :host {
+        display: block;
+        box-sizing:border-box;
+        width:100%;
+      }
+      
+      :host *{
+        box-sizing:border-box;
+      }
+      
+      
+      
+      
+      paper-spinner.style-scope.edb-field.x-scope.paper-spinner-0 {
+          position: absolute;
+          top: 50%;
+          left: 50%;
+          z-index: 9;
+          width: 100px;
+          height: 100px;
+          margin-left: -50px;
+          margin-top: -50px;
+      }
+      :host[loading] paper-spinner{
+        display:block;
+      }
+      #field{
+        @apply(--layout-vertical);
+        width:100%;
+        margin-bottom:20px;
+      }
+      #label{
+        @apply(--layout-horizontal);
+        width:100%;
+        padding:0 20px;
+        margin-bottom:10px;
+        @apply(--edb-field-label);
+      }
+      paper-tab{
+        font-size:11px;
+        text-transform:uppercase;
+        letter-spacing:0.1em;
+      }
+      #control{
+        @apply(--layout-horizontal);
+        width:100%;
+        padding:0 20px;
+      }
+      #control paper-input:first-of-type,
+      #control paper-textarea:first-of-type{
+        margin-right:20px;
+      }
+      paper-dropdown-menu,paper-listbox{
+        width:300px;
+      }
+      paper-button{
+        font-size:11px;
+      }
+      paper-input{
+        min-width:300px;
+      }
+      paper-checkbox{
+        margin-right:20px;
+      }
+      paper-textarea{
+        min-width:300px;
+        max-width:400px;
+        /*min-height:200px;*/
+      }
+      paper-icon-button ::content iron-icon{
+        width:16px;
+        height:16px;
+      }
+      paper-button iron-icon{
+        margin-right:10px;
+        width:20px;
+        height:20px;
+      }
+      .list-input{
+        padding:10px 0;
+      }
+      .list-input,
+      .list-input-items{
+        @apply(--layout-vertical);
+        width:100%;
+      }
+      .list-input-item{
+        width:100%;
+        @apply(--layout-horizontal);
+        margin-bottom:10px;
+      }
+      .image-upload{
+        width:100%;
+        @apply(--layout-vertical);
+      }
+      .image-preview{
+        position:relative;
+        min-width:100%;
+        width:calc(100% - 40px);
+        min-height:500px;
+        max-width:100%;
+        margin:10px 20px 0 0 ;
+        transition: all .2s ease-in;
+      }
+      .remove{
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        background: rgba(0,0,0,0.7);
+        color:#fff;
+        border-radius: 50%;
+        text-align: center;
+        line-height: 20px;
+      }
+      .image-preview iron-image{
+        position:absolute;
+        top:0;
+        left:0;
+        right:0;
+        /*background:url("data:image/png,%89PNG%0D%0A%1A%0A%00%00%00%0DIHDR%00%00%00%14%00%00%00%14%08%06%00%00%00%8D%89%1D%0D%00%00%00PIDAT8O%ED%92%B1%11%00%10%10%04%F7%B5%A0%03%9A%D0%7F%1F%94%E2%8D%40%86%97I%FE%E2%9D%0BvV%80%82%3D%05%AA%8D%A1%E2%87%27M%EE%F0%18%D0%DFl%DAC%D8%7D%86%1D%81%F0%00%27%60%F2%D7%ADC%13%04%B2%1Fn%5D%BA%C3kb%7F%B2%19s%DB%21%03%E3%13V%FE%00%00%00%00IEND%AEB%60%82");*/
+        /*background-repeat:repeat!important;*/
+        /*background-size:20px 20px!important*/
+        bottom:0;
+        width:100%;
+        height:100%;
+        /*--iron-image-placeholder:{*/
+        /*  background:none;*/
+          
+        /*}*/
+      }
+      .caption{
+        position: absolute;
+        top: 100%;
+        margin-top: -20px;
+        background: rgba(0,0,0,0.3);
+        color: #fff;
+        
+        height: 20px;
+        line-height: 20px;
+        font-size: 12px;
+        padding: 0 10px;
+        left: 50%;
+        margin-left: -60px;
+        width: 120px;
+        text-align: center;
+      }
+      .category-select{
+        margin-top:10px;
+        @apply(--layout-horizontal);
+        @apply(--layout-wrap);
+      }
+      #uploader{
+        position:relative;
+        
+      }
+      #uploader paper-button{
+        width:100%;
+        background:#000;
+        margin:10px 0;
+        color:#fff;
+      }
+      
+      #uploader input{
+        display:none;
+      }
+      
+      @media all and (max-width:768px){
+        #control{
+          @apply(--layout-vertical)
+        }
+        #control paper-input,
+        #control paper-textarea{
+          min-width:100%;
+          clear:both;
+        }
+      }
+    </style>
+   
+    <div id="field" class="field" type$="{{type}}">
+      <div id="label" class="field-label">{{label}}</div>
+      <div id="control" class="field-control">
+        <template is="dom-if" if="{{__equals(type,'text')}}">
+          <paper-input no-label-float label="{{label}}" value="{{value}}"></paper-input>
+        </template>  
+        <template is="dom-if" if="{{__equals(type,'number')}}">
+          <paper-input no-label-float label="{{label}}" type="number" value="{{value}}"></paper-input>
+        </template>  
+        
+        <template is="dom-if" if="{{__equals(type,'money')}}">
+          <paper-input no-label-float label="0.00" type="number" value="{{value}}">
+            <div prefix>$</div>
+          </paper-input>
+        </template>  
+        
+        <template is="dom-if" if="{{__equals(type,'radio')}}">
+          <paper-radio-group selected="{{value}}">
+            <template is="dom-repeat" items="{{choices}}" as="choice">
+                <paper-radio-button label="{{choice}}" name="{{choice}}" value="{{choice}}">{{choice}}</paper-radio-button>
+            </template>
+          </paper-radio-group>  
+          
+        </template>  
+        
+        <template is="dom-if" if="{{__equals(type,'url')}}">
+          <paper-input no-label-float label="{{label}}" type="url" value="{{value}}"></paper-input>
+        </template>  
+        <template is="dom-if" if="{{__equals(type,'dualtext')}}">
+          <paper-input no-label-float label="en" value="{{value.en}}"></paper-input>
+          <paper-input no-label-float label="fr" value="{{value.fr}}"></paper-input>
+        </template>  
+        <template is="dom-if" if="{{__equals(type,'dualtextarea')}}">
+          
+            <paper-textarea rows="5" no-label-float label="en" value="{{value.en}}"></paper-textarea>  
+            <paper-textarea rows="5" no-label-float label="fr" value="{{value.fr}}"></paper-textarea>
+          
+          
+          
+        </template>  
+        <template is="dom-if" if="{{__equals(type,'textarea')}}">
+          <paper-textarea rows="5" no-label-float label="{{label}}" value="{{value}}"></paper-textarea>
+        </template>  
+        
+        <template is="dom-if" if="{{__equals(type,'list')}}">
+          <div class="list-input">
+            <div class="list-input-items">
+              <template id="listInputRepeater" is="dom-repeat" items="{{items}}">
+                <div class="list-input-item">
+                  <paper-input no-label-float label="{{index}}" value="{{item}}"></paper-input>
+                  <paper-icon-button icon="close" class="item-remove"></paper-icon-button>
+                </div>
+               
+              </template>
+            </div>
+            <div class="list-input-add">
+              <paper-button on-tap="__handlePush"><iron-icon icon="add"></iron-icon>add line</paper-button>
+            </div>
+          </div>
+        </template>
+        
+        
+        <template is="dom-if" if="{{__equals(type,'select')}}">
+          <div class="category-select">
+            <template is="dom-repeat" items="{{preparedChoices}}" as="choice">
+              <paper-checkbox on-tap="__setChoiceAsValue" checked="[[choice.checked]]">{{choice.name.en}}</paper-checkbox>
+            </template>
+          </div>
+        </template>
+        
+          
+        <template is="dom-if" if="{{__equals(type,'duallist')}}">
+          <div class="list-input">
+            <div class="list-input-items">
+              <template id="listInputRepeater" is="dom-repeat" items="{{items}}">
+                <div class="list-input-item">
+                  
+                    <paper-input no-label-float label="en" value="{{item.en}}"></paper-input>
+                    <paper-input no-label-float label="fr" value="{{item.fr}}"></paper-input>
+                  
+                  <paper-icon-button icon="close" class="item-remove" on-tap="__handleSplice"></paper-icon-button>
+                </div>
+              </template>
+            </div>
+            <div class="list-input-add">
+              <paper-button on-tap="__handlePush"><iron-icon icon="add"></iron-icon>add line</paper-button>
+            </div>
+          </div>
+        </template>
+        
+        <template id="singleImage" is="dom-if" if="{{__equals(type,'singleimage')}}">
+          <div class="image-upload">
+          <div class="image-preview">
+            <iron-image on-loaded-changed="__resizePreview" preload fade sizing="contain" src="{{value.src}}"></iron-image>
+            <paper-spinner active="{{loading}}"></paper-spinner>
+            <paper-icon-button class="remove" icon="close" on-tap='__handleRemoveSingleImage'></paper-icon-button>
+            <p class="caption"></p>
+          </div>
+          <div id="uploader">
+            <paper-button id="uploadSingleImageButton" on-tap="__proxySingleUploadTap">choose file</paper-button>
+            <input id="singleImageFileChooser" type="file" on-change="__handleFileUpload"></input>
+          </div>
+          </div>
+          
+        </template>
+        
+        
+        <template id="multiImage" is="dom-if" if="{{__equals(type,'multiimage')}}">
+          <div class="image-upload">
+            <div class="image-previews">
+              <template is="dom-repeat" items="{{value}}" as="image">
+                <div class="image-preview">
+                  <iron-image on-loaded-changed="__resizePreview" preload fade sizing="contain" src="{{image.src}}"></iron-image>
+                  <paper-spinner active="{{loading}}"></paper-spinner>
+                  <paper-icon-button class="remove" icon="close" on-tap='__handleRemoveImage'></paper-icon-button>
+                  <p class="caption"></p>
+                </div>
+              </template>
+            </div>
+          
+          <div id="uploader">
+            <paper-button id="uploadMultiImageButton" on-tap="__proxyMultiUploadTap">choose files</paper-button>
+            <input id="multiImageFileChooser" type="file" on-change="__handleMultiFileUpload"></input>
+          </div>
+          </div>
+          
+        </template>
+        
+        
+        <template is="dom-if" if="{{__equals(type,'country')}}">
+          <div class="category-select">
+            
+            <edb-global-meta name="selectedCountry" value="[[selectedCountry]]"></edb-global-meta>
+            <edb-global-meta name="countries" on-value-changed="__setCountries"></edb-global-meta>
+            <paper-dropdown-menu label="{{label}}">
+              <paper-listbox id="countryList" class="dropdown-content" selected="{{selectedCountry}}" attr-for-selected="data-geoid">
+                
+                <template id="countryRepeater" is="dom-repeat" as="choice" items="{{countries}}">
+                  <paper-item data-geoid="{{choice.geoid}}">{{choice.name}}</paper-item>
+                </template>
+              </paper-listbox>
+            </paper-dropdown-menu>
+            
+          </div>
+        </template>
+        
+        <template is="dom-if" if="{{__equals(type,'state')}}">
+          <div class="category-select">
+            <edb-global-meta name="states" on-value-changed="__setStates"></edb-global-meta>
+           <paper-dropdown-menu label="{{label}}">
+             <paper-listbox id="stateList" class="dropdown-content" selected="{{selectedState}}">
+               <template id="stateRepeater" is="dom-repeat" items="{{states}}" as="choice">
+                  <paper-item>{{choice.name}}</paper-item>
+               </template>
+             </paper-listbox>
+           </paper-dropdown-menu>
+          </div>
+        </template>
+        
+        <!--<iron-meta key="selectedCountry" value="{{selectedCountry}}"></iron-meta>-->
+        
+        <!--<iron-meta key="states" value="{{geoStates}}"></iron-meta>-->
+        
+      </div>
+      
+    </div>
+    
+
+  </template>
+    
+    
+    
+    
+  <script>
+    Polymer({
+
+      is: 'edb-field',
+
+      properties: {
+       label: {
+         type: String,
+         notify: true,
+         reflectToAttribute: true
+       },
+       type:{
+         type: String,
+         notify: true,
+         value: 'text',
+         reflectToAttribute: true
+       },
+       items: {
+         type: Array,
+         notify: true,
+         computed: "_computeItems(value)",
+       },
+       choices: {
+         type: Array,
+         notify: true,
+         value: function(){
+           return [];
+         }
+       },
+       countries: {
+         notify: true,
+         type: Array,
+         value: function(){ return [] }
+       },
+       states: {
+         notify: true,
+         type: Array,
+         value: function(){ return [] }
+       },
+       selectedCountry: {
+         notify: true,
+         type:String
+       },
+       selectedState:{
+         notify: true,
+         type:String
+       },
+       compare: {
+         type: String,
+         value: 'id',
+       },
+       
+       loading: {
+         type: Boolean,
+         notify: true,
+         reflectToAttribute: true
+       },
+       value:{
+        // type: String,
+         notify: true,
+        
+        // observer: '__log'
+       }
+      },
+      observers: [
+        '__setChecked(type,value,choices)',
+        '__setCountry(selectedCountry)',
+        '__setState(selectedState)'],
+        __setCountry: function(selectedCountry){
+          var country = this.countries.filter( function(c ){ return c.geoid ==selectedCountry})[0];
+          this.set('value', country.code ) ;
+        },
+        __setState: function(selectedState){
+          var state = this.countries.filter( function(c ){ return c.geoid ==selectedState})[0];
+          this.set('value', state.name ) ;
+        },
+        __setCountries: function( countries ){
+          console.log('__setCountries', countries)
+          if(countries.detail.value){
+            this.set('countries', countries.detail.value );
+          }
+          
+          
+        },
+        __setStates: function( states ){
+          this.set('states', states.detail.value );
+        },
+      __setChecked: function( type, value, choices ){
+        this.set('preparedChoices', choices );
+        
+        if(type=='select'){
+          value.forEach(function(c){
+            choices.forEach( function(choice, i ){
+              if(choice[this.compare] == c){
+                choice.checked=true;
+                this.notifyPath('preparedChoices.'+i+'.checked', true );
+              }else{
+                this.notifyPath('preparedChoices.'+i+'.checked', false);
+              }
+            },this)
+          }, this)
+        }
+      },
+      __log: function( v ){
+        console.log( this.label, v)
+      },
+      __resizePreview: function( event ){
+        var root = Polymer.dom(event).rootTarget;
+        var preview = root.parentNode;
+        var caption = preview.querySelector('.caption');
+        var img = root.querySelector('img');
+          var size = 500;
+          if(img.height > 0){
+            size = img.height/img.width * preview.getBoundingClientRect().width;
+          }
+          if(size == 0){
+            size = 500;
+          }
+          preview.style.minHeight = Math.round(size) + 'px';
+          var w = img.width/img.height * preview.getBoundingClientRect().height;
+          if(!isNaN(w)){
+            preview.style.width= w + 'px';
+          }
+          if( img.height > 0 ){
+            caption.style.display="inline-block";
+            caption.innerText = [img.width,img.height].join('×');
+          }else{
+            caption.style.display="none";
+          }
+        
+      },
+      _computeItems: function( value ){
+        if(Array.isArray(value)) return value;
+        return [];
+      },
+      __proxySingleUploadTap: function( event ){
+        var parent = Polymer.dom(event).rootTarget.parentNode;
+        parent.querySelector('input').click();
+        
+      },
+      __proxyMultiUploadTap: function( event ){
+        var parent = Polymer.dom(event).rootTarget.parentNode;
+        parent.querySelector('input').click();
+      
+      },
+      __setChoiceAsValue: function(event){
+        
+          if(!Array.isArray(this.value)){
+            this.set('value', [] );
+          }
+          if(Polymer.dom(event).localTarget.checked){
+            var result = {};
+            var choice = this.choices[event.model.index];
+            this.push('value', choice[this.compare] );  
+          }else{
+            var compare = event.model.choice[this.compare];
+            var index;
+            for(index=0;index<this.value.length;index++){
+              
+              if(this.value[index] == compare){
+                break;
+                
+              }
+            }
+            // console.log('splice', index, 1, compare  );
+            this.splice('value', index, 1  );
+            
+          }
+          this.notifyPath('value.length', this.value.length );  
+        
+        
+      },
+      __handleSplice: function( event ){
+        var index = event.model.index;
+        this.splice('items', index, 1 );
+      },
+      __handlePush: function( event ){
+        this.push('items', { en: null, fr: null });
+      },
+      __equals: function( thing, expected){
+        return thing == expected;
+      },
+      __handleRemoveImage: function(event){
+          var index = event.model.index;
+          this.splice('value', index, 1);
+      },
+      __handleRemoveSingleImage:function(event){
+          this.set('value.src', null);
+          this.set('value.id', null);
+        },
+      __updateImagePreviewSize: function( height ){
+        // var pv = this.querySelector('.image-preview');
+        
+        // if(pv){
+        //   pv.style.height = height + 'px';
+        // }
+        
+        // var imgHeight =  iron-image').getBoundingClientRect();
+        // this.querySelector('#singlePreview').style.height = imgHeight + 'px';
+      },
+      __handleMultiFileUpload: function( event ){
+        var files = event.target.files;
+        var uploads = [];
+        for(var i = 0; i< files.length; i++ ){
+          var file = files[i];
+          uploads.push( function(){
+            this.set('loading', true );
+            window.WPRestConnections.worpdress.__request('POST', '/media', { name: file.name, fileData: file } , { context: 'edit' } ).then( function( result ){
+              this.push('value', { src: result.source_url, id: result.id });
+              this.set('loading', false);
+            }.bind(this)).catch(function(e){
+              Polymer.__notifyFailure( e.message )
+              console.log(e)
+            });
+            
+          }.bind(this));
+        }
+        return uploads.reduce( function( prev, next ){
+          return prev.then( next );
+        }.bind(this), Promise.resolve() );
+      },
+      __handleFileUpload: function( event ){
+        var file = event.target.files[0];
+        this.set('loading', true );
+        window.WPRestConnections.worpdress.__request('POST', '/media', { name: file.name, fileData: file } , { context: 'edit' } ).then( function( result ){
+          this.set('loading', false );  
+          this.set('value.src', result.source_url );
+          this.set('value.id', result.id );
+          this.notifyPath('value.src',result.source_url)
+          this.notifyPath('value.id',result.id)
+          // console.log('set id and source url', result.id, result.source_url);
+          this.__updateImagePreviewSize( ( result.media_details.height * 500 ) / result.media_details.width  );
+        }.bind(this));
+      }
+        
+      
+
+    });
+  </script>
+</dom-module>

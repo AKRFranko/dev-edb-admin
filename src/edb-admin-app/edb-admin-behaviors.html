@@ -1,0 +1,713 @@
+<script>
+  
+  (function(){
+    'use strict';
+    if(!this.EDB){
+      this.EDB = {};
+    };
+    
+    var logS = function( a ){
+      // delete a[0].data
+      console.log('success',a);
+      return a;
+    };
+    
+    var logF = function(e){
+      console.log('error', e );
+      return e;
+    };
+    
+    var wpRest = document.createElement('wp-rest'),
+        wcRest = document.createElement('wp-rest');
+    
+    wpRest.name = 'worpdress';
+    wcRest.name = 'woocommerce';
+    wpRest.host = window.creds.apiHost;
+    wpRest.namespace = window.creds.apiNamespace;
+    wpRest.authKey = window.creds.authKey;
+    wpRest.authSecret = window.creds.authSecret;
+    
+    wcRest.host = window.creds.apiHost;
+    wcRest.namespace = 'wc/v1';
+    wcRest.authKey = window.creds.authKey;
+    wcRest.authSecret = window.creds.authSecret;
+    
+    window.splitTranslation = function( string ){
+      if(!string) return { en: en, fr: fr };
+      
+      var parts = string.trim().split('{:}', 2 );
+      if(parts.length == 1){
+        return { en: parts[0], fr: null };
+      }
+      var fr = (~parts[0].indexOf('{:fr}') ? parts[0] : parts[1]).slice(5);
+      var en = (~parts[0].indexOf('{:en}') ? parts[0] : parts[1]).slice(5);
+      return { en: en, fr: fr };
+    };
+    
+    window.joinTranslation = function( obj ){
+      if(!obj) return obj;
+      return [ '{:en}', obj.en , '{:}{:fr}', obj.fr ,'{:}'].filter( function( v){ return !!v; } ).join('');
+    };
+    
+    ;
+    EDB.createObject = function( api, name, path, loadData , toJSON ){
+      var K;
+      var lowername = name.toLowerCase();
+      
+      
+      K = function( data ){
+        if(!this instanceof K) return new K( data||{} );
+        var instance = this.loadData(data||{});
+        // console.log('instance', instance )
+        Object.defineProperty( this, 'isNew', { get: function(){
+          return !this.id;
+        }})
+        return instance;
+      };
+      K.list = function(){
+        return api.__request('GET', path,  null, { context: 'edit'} ).then( function( items ){
+          console.log(items, name)
+          return items.map( function( data ){
+            var instance = new K( data );
+            return instance;
+          });
+        });
+      };
+      K.get = function( id ){
+        console.log('GETTING')
+        return api.__request('GET', path + '/' + id,null,  { context: 'edit'  } ).then( function( data ){
+          // console.log("GOT", data)
+            return new K( data );
+        });
+      };
+      K.prototype = {
+        create: function(  ){
+          var reload = this.loadData.bind(this);
+          var data = this.toJSON();
+          if(!data){
+            console.log('no json data', this )
+          }
+          data.status = 'publish';
+          return api.__request('POST', path , data, {context: 'edit'}).then( function( data ){
+            console.log('create reload')
+            return reload( data );
+          });
+        },
+        read: function(  ){
+          var reload = this.loadData.bind(this);
+          console.log('read reload')
+          return api.__request('GET', path + '/' + this.id  , null,  {context: 'edit'}).then( function( data ){
+            console.log('read reload')
+            return reload( data );
+          });
+        },
+        update: function(  ){
+          
+          var reload = this.loadData.bind(this);
+          var data = this.toJSON();
+          return api.__request('PUT', path+ '/' + this.id , data, {context: 'edit'}).then( function( data ){
+            console.log('update reload')
+            return reload( data );
+          });
+        },
+        delete: function(  ){
+          var reload = this.loadData.bind(this);
+          return api.__request('DELETE', path + '/' + this.id , null,  {context: 'edit'}).then( function( data ){
+            console.log('delete reload')
+            return reload( {} );
+          });
+        },
+        save: function(  ){
+          
+          return !!this.id ? this.update() : this.create();
+        },
+        loadData: function( data ){
+          if(!data){ data = {}};
+          console.log('loadData', name)
+          var loaded = loadData.call( this, (this.data=data) );
+          return loaded;
+        },
+        toJSON: function(){
+          var json = toJSON.call( this );
+          console.log('toJSON', json)
+          return json;
+        }
+      };
+      
+      EDB[name] = K;
+      EDB[name].prototype.constructor = K;
+      
+      EDB[name].polymerObject = {
+          is: 'edb-'+lowername,
+          properties: {
+          ref: {
+            type: Object,
+            value: function(){ return EDB[name]; }
+          },
+          itemId: {
+             type: String,
+             notify: true,
+             reflectToAttribute: true,
+             observer: '__itemIdChanged'
+          },
+          items: {
+             type: Array,
+             notify: true,
+             value: function(){
+                return [];
+             }
+          },
+          item: {
+            type: Object,
+            notify: true
+          },
+          
+          loading: {
+            type: Boolean,
+            notify: true,
+            value: false,
+            // reflectToAttribute: true
+          }
+        },
+        __notifyFailure: function( e ){
+          Polymer.__notifyFailure( e.message );
+          this.set('loading', false);
+          console.error( e );
+        },
+        __itemIdChanged: function( id ){
+          console.log('__itemIdChanged', id )
+          if(id == 'new'){
+            this.set('item',new this.ref( ));
+          }else{
+            this.set('item',null);
+            this.set('loading', true );
+            this.ref.get( id ).then( function( item ){
+              this.set('item', item );
+              this.set('loading', false );
+            }.bind(this)).catch( this.__notifyFailure.bind(this) );
+          }
+        },
+        save: function(){
+          if( this.item ){
+              this.set('loading', true );
+             return this.item.save().then( function( saved ){
+               this.set('item', saved );
+               this.set('itemId', saved.id );
+               this.set('loading', false );
+               this.refresh();
+             }).catch( this.__notifyFailure.bind(this) );
+          }
+        },
+        delete: function(){
+          if( this.item ){
+             this.set('loading', true );
+             return this.item.delete().then( function(){
+               return this.item.save().then( function( saved ){
+                 this.set('loading', true );
+                 this.set('itemId', null);
+                 this.set('item', null);
+                 this.set('loading', false );
+                 this.refresh();
+               }.bind(this)).catch( this.__notifyFailure.bind(this) );
+             }.bind(this)).catch( this.__notifyFailure.bind(this) );
+          }
+        },
+        refresh: function(){
+          console.log('refreshing', name);
+          if( this.ref ){
+            this.set('loading', true );
+             return this.ref.list().then( function( list ){
+               this.set('items', list );
+               this.fire('refresh');
+               this.set('loading', false );
+             }.bind( this )).catch( this.__notifyFailure.bind(this) );;
+          }else{
+             this.fire('refresh');
+             return Promise.resolve();
+          }
+        }
+      };
+      EDB[name].polymerConstructor = Polymer.Class(EDB[name].polymerObject);
+      document.registerElement('edb-'+lowername, EDB[name].polymerConstructor );
+      return EDB[name];
+      
+    } // end of createObject();
+    
+    
+    
+    
+    
+    // EDB OBJET CREATION //
+    EDB.createObject( 
+      wcRest, 
+      'Category', 
+      'products/categories',  
+      function loadData( data ){
+        if(!data) data = {};
+        this.data= data;
+        this.id = data.id == 'new' ? null : data.id;
+        this.name = splitTranslation( data.name );
+        this.description = splitTranslation( data.description );
+        this.slug = data.slug;
+        
+        return this;
+      },
+      function convert(){
+        return {
+          id: this.id,
+          name: joinTranslation( this.name ),
+          description:joinTranslation( this.description ),
+          slug: this.slug,
+          
+        }
+      }
+    );
+    
+    EDB.createObject( 
+      wpRest, 
+      'Material', 
+      'materials',  
+      function loadData( data ){
+        if(!data){ data = {}};
+        var title = data.title ? data.title.rendered : null;
+        var content = data.content ? data.content.rendered : null;
+        
+        if( title ){
+          title = splitTranslation( title )
+        }else{
+          title = { en: null, fr: null };
+        }
+        if( content ){
+          var split = splitTranslation( content );
+          var enlines = split.en.split('|');
+          var frlines = split.fr.split('|');
+          content = [];
+          var end = Math.max(enlines.length,frlines.length);
+          for(var i =0; i < end; i++){
+            var en = enlines[i]||'';
+            var fr = frlines[i]||'';
+            content.push( { en: en, fr: fr });
+          }
+          
+        }else{
+          content = [ ];
+        }
+        
+        this.id = data.id == 'new' ? null : data.id;
+        this.image = { src: data.featured_image, id: data.featured_media };
+        this.name = title;
+        this.composition = content;
+        this.number = data.meta_box ? data.meta_box.edb_material_number : null;  
+        
+        this.data=data;
+        
+        return this;
+      },
+      function convert(){
+        var content = this.composition;
+        
+        var enlines = [];
+        var frlines = [];
+        this.composition.forEach( function( line ){
+          enlines.push( line.en );
+          frlines.push( line.fr );
+        })
+        content = { en: enlines.join('|'), fr: frlines.join('|')}
+        // console.log(this.number)
+        return {
+          id: this.id,
+          featured_media: this.image.id,
+          title: joinTranslation( this.name ),
+          content: joinTranslation( content ),
+          meta_box: { edb_material_number: this.number },
+          
+        };
+      }
+    );
+    
+  var convertVariation = function( data ){
+    var materialNumber = data.material ? data.material.number : data.materialNumber ? data.materialNumber : null;
+    var attributes = [ { name: 'edb_material', option: materialNumber }];
+    var image = data.image && data.image.src ?   [ { id: data.image.id, position: 0 } ]    : null ;
+    var variation = { image: image, manage_stock: true, tax_status: 'taxable', backorders_allowed: true , attributes: attributes };
+    if(data.id) variation.id = data.id;
+    return ['regularPrice', 'salePrice', 'stockQuantity'].reduce( function( def, key ){
+      var underscoreKey = Polymer.CaseMap.camelToDashCase( key ).replace(/-/g,'_');
+      def[underscoreKey] = data[key];
+      return def;
+    }, variation );
+  }
+  var loadVariation = function( data ){
+   var image = data.image && data.image[0] ? data.image[0] : {src: null, id: null };
+   console.log('loadVariation', image )
+   var materialNumber = data.attributes && data.attributes[0] ? data.attributes[0].option : null;
+   var variation = { image: image, materialNumber: materialNumber, material: null };
+   if(data.id) variation.id = data.id;
+   return ['regularPrice', 'salePrice', 'stockQuantity'].reduce( function( obj, key ){
+     var underscoreKey = Polymer.CaseMap.camelToDashCase( key ).replace(/-/g,'_');
+     obj[key]=data[underscoreKey];
+     return obj;
+   }, variation );
+  }
+  
+  EDB.createObject( 
+    wcRest, 
+    'Product', 
+    'products',
+    function loadData( data ){
+      console.log('loadProductData',data.images);
+      if(!data){ data = {}};
+      this.data=data;
+      var images = data.images||[];
+      var featured;
+      if(images){
+        featured =images.shift();
+      }
+      featured = featured || {};
+      
+      var desc = data.description;
+      if(desc){
+        desc = desc.replace(/<\/?p>/g,'');
+      }
+      var attrEdbMaterial = data.attributes &&  data.attributes[0] ? data.attributes[0] : { name: "edb_material", options:[],variation:true,visible:true};
+      
+      this.id = data.id == 'new' ? null : data.id;
+      this.featuredImage = featured;
+      this.images = images;
+      this.name = data.name;
+      this.categories = data.categories||[];
+      this.description = splitTranslation(desc);
+      this.regularPrice = data.regular_price || data.price || null;
+      this.salePrice = data.sale_price|| null;
+      this.stockQuantity = data.stock_quantity||0;
+      this.variations = (data.variations || []).map( loadVariation ).map( function( v ){
+        
+                                                              if(v.image && v.image.src === featured.src ){
+                                                                v.image = {id: null, src: null };
+                                                              }
+                                                              return v;
+                                                            });
+      this.availableMaterials = attrEdbMaterial.options;
+      this.availableVariations = this.variations
+      var wwlTitle = data.meta_box ? data.meta_box.edb_why_we_love_title : '';
+      var wwlContent = data.meta_box ? data.meta_box.edb_why_we_love_content : '';
+      var wireframe = data.meta_box && data.meta_box.edb_wireframe ? { id: data.meta_box.edb_wireframe.ID, src: data.meta_box.edb_wireframe.full_url }  : null;
+      var anatomy_en = data.meta_box && data.meta_box.edb_anatomy_en ? { id: data.meta_box.edb_anatomy_en.ID, src: data.meta_box.edb_anatomy_en.full_url }  : null;
+      var anatomy_fr = data.meta_box && data.meta_box.edb_anatomy_fr ? { id: data.meta_box.edb_anatomy_fr.ID, src: data.meta_box.edb_anatomy_fr.full_url }  : null;
+      this.whyWeLoveTitle=splitTranslation(wwlTitle);
+      this.whyWeLoveContent=splitTranslation(wwlContent);
+      this.wireframe = wireframe;
+      this.anatomyEn = anatomy_en || { id: null, src: null };
+      this.anatomyFr = anatomy_fr|| { id: null, src: null };
+      
+      return this;
+    },
+    function convertData(  ){
+      var featured = this.featuredImage||{};
+      var images = this.images.map( function( i ){ return { src: i.src, id: i.id }});
+      if(featured.id){
+        featured.position=0;
+        images.unshift( featured );  
+        console.log('unshifting feastures',featured.id);
+      }else{
+        images.unshift( { id:null,src:null});
+      }
+      var availableMaterials = this.availableMaterials;
+      var attribute_edb_material = [];
+      if(!!availableMaterials.length){
+        availableMaterials.forEach( function( am ){
+          console.log('am',am)
+          attribute_edb_material.push(am)
+        });
+      }else{
+        attribute_edb_material = null;
+      }
+      var oldVariations = this.variations;
+      var availableVariations = this.availableVariations;
+      var updateVariations = [];
+      if(!!oldVariations.length){
+        oldVariations.forEach( function( ov ){
+          var found = availableVariations.filter( function( av ){ return av.materialNumber == ov.materialNumber} )[0];
+          if(!found){
+            // ov.visible=false;
+            updateVariations.push( ov );
+          }else{
+            // found.visible=true;
+            updateVariations.push( found );
+          }
+        });
+      }else{
+        updateVariations = availableVariations;
+      }
+      availableVariations.forEach( function( av ){
+        var existing = updateVariations.filter( function( uv ){ return av.materialNumber == uv.materialNumber} )[0];
+        if(!existing){
+          // av.visible=true;
+          updateVariations.push( av );
+        }
+      });
+      
+      var converted = {
+        id: this.id,
+        images: images,
+        name: this.name,
+        type: 'variable',
+        description: joinTranslation( this.description ).trim(),
+        categories: this.categories.map( function( c ){ return c.id }),
+        backorders:'yes',
+        meta_box: {
+          edb_why_we_love_title: joinTranslation( this.whyWeLoveTitle ),
+          edb_why_we_love_content:joinTranslation( this.whyWeLoveContent ),
+          edb_wireframe:this.wireframe ? 1*this.wireframe.id : null,
+          edb_anatomy_en:this.anatomyEn ? 1*this.anatomyEn.id : null,
+          edb_anatomy_fr:this.anatomyFr ? 1*this.anatomyFr.id : null,
+        },
+        attributes: [
+          { name: 'edb_material', visible: true, variation: true, options: attribute_edb_material ? attribute_edb_material.join('|') : null },
+        ],
+        variations: updateVariations.map( convertVariation ),
+        regular_price: this.regularPrice,
+        sale_price: this.salePrice,
+        stock_quantity: this.stockQuantity
+      }
+      console.log('converted',converted)
+      return converted;
+      
+    }
+  );
+  
+  EDB.createObject( 
+    wpRest, 
+    'Slide', 
+    'slides',
+    function loadData( data ){
+      this.id = data.id == 'new' ? null : data.id;
+      this.image = { src: data.featured_image, id:  data.featured_media };
+      this.title = splitTranslation(data.title ? data.title.rendered : '');
+      this.subtitle = splitTranslation( data.content ? data.content.rendered  : '');
+      this.slide_url = data.meta_box ? data.meta_box.edb_slide_url : '';
+      
+      return this;
+    },
+    function convertData(  ){
+      console.log('convert side', this );
+      return {
+               id: this.id,
+               featured_media: this.image.id,
+               title: joinTranslation(this.title),
+               content: joinTranslation( this.subtitle ),
+               meta_box: { edb_slide_url: this.slide_url }
+             }
+    }
+  );
+  
+  EDB.createObject( 
+    wpRest, 
+    'Feature', 
+    'features',
+    function loadData( data ){
+      if(!data) data = {};
+      
+      this.id = data.id == 'new' ? null : data.id;
+      this.image = { src: data.featured_image, id:  data.featured_media };
+      this.title = splitTranslation(  data.title ? data.title.rendered  : ''  );
+      this.content = splitTranslation(  data.content ? data.content.rendered  : ''  );
+      
+      this.feature_url = data.meta_box ? data.meta_box.edb_feature_url : '';
+      
+      return this;
+    },
+    function convertData(  ){
+      // console.log('convert feature', this );
+      return {
+               id: this.id,
+               featured_media: this.image.id,
+               title: joinTranslation(this.title),
+               content: joinTranslation( this.content ),
+               meta_box: { edb_feature_url: this.edb_feature_url }
+             }
+    }
+  );
+  
+  EDB.createObject( 
+    wpRest, 
+    'Lookbook', 
+    'lookbooks',
+    function loadData( data ){
+      // if(!data) data = {};
+      
+      // this.id = data.id == 'new' ? null : data.id;
+      // this.image = { src: data.featured_image, id:  data.featured_media };
+      // this.title = splitTranslation(  data.title ? data.title.rendered  : ''  );
+      // this.content = splitTranslation(  data.content ? data.content.rendered  : ''  );
+      
+      // this.feature_url = data.meta_box ? data.meta_box.edb_feature_url : '';
+      
+      // return this;
+    },
+    function convertData(  ){
+      // // console.log('convert feature', this );
+      // return {
+      //         id: this.id,
+      //         featured_media: this.image.id,
+      //         title: joinTranslation(this.title),
+      //         content: joinTranslation( this.content ),
+      //         meta_box: { edb_feature_url: this.edb_feature_url }
+      //       }
+    }
+  );
+  
+  EDB.createObject( 
+    wpRest, 
+    'Page', 
+    'pages',
+    function loadData( data ){
+      if(!data) data = {};
+      this.id = data.id == 'new' ? null : data.id;
+      this.image = { src: data.featured_image||'', id:  data.featured_media };
+      this.title = splitTranslation(  data.title ? data.title.rendered  : ''  );
+      this.content = splitTranslation(  data.content ? data.content.rendered  : ''  );
+      return this;
+    },
+    function convertData(  ){
+      console.log('convert page', this );
+      return {
+               id: this.id,
+               featured_media: this.image.id,
+               title: joinTranslation(this.title),
+               content: joinTranslation( this.content )
+             }
+    }
+  );
+  
+  
+  EDB.createObject( 
+    wcRest, 
+    'Customer', 
+    'customers',
+    function loadData( data ){
+      if(!data) data = {};
+      
+      // this.id = data.id == 'new' ? null : data.id;
+      // this.image = { src: data.featured_image||'', id:  data.featured_media };
+      // this.title = splitTranslation(  data.title ? data.title.rendered  : ''  );
+      // this.content = splitTranslation(  data.content ? data.content.rendered  : ''  );
+      return this;
+    },
+    function convertData(  ){
+      console.log('convert page', this );
+      return {
+               id: this.id,
+               featured_media: this.image.id,
+               title: joinTranslation(this.title),
+               content: joinTranslation( this.content )
+             }
+    }
+  );
+  
+  function loadCustomerMeta( data ){
+   var customer_meta = data.customer_meta||{};
+   var billingFields = ['first_name','last_name','company','address_1','address_2','city','postcode','country','state','email','phone'];
+   var shippingFields = ['first_name','last_name','company','address_1','address_2','city','postcode','country','state'];
+   var billing ={};
+   var shipping={};
+   billingFields.forEach( function( field ){
+     var parts = field.split('_');
+     var upperKey = parts[0] + parts.slice(1).map( function( p ){ return p.slice(0,1).toUpperCase() + p.slice(1); });
+    // console.log('upperKey',upperKey)
+     billing[upperKey] = customer_meta['billing_'+field]||null;
+   });
+   shippingFields.forEach( function( field ){
+     var parts = field.split('_');
+     var upperKey = parts[0] + parts.slice(1).map( function( p ){ return p.slice(0,1).toUpperCase() + p.slice(1); });
+     shipping[upperKey] = customer_meta['shipping_'+field]||null;
+   });
+   return { billing: billing, shipping: shipping };
+  }
+  function convertCustomerMeta( data ){
+    var customerMeta={};
+    Object.keys(data.billing).forEach( function( metaKey ){
+      var underscoreKey = Polymer.CaseMap.camelToDashCase( metaKey ).replace(/-/g,'_');
+      if(underscoreKey =='address1'){
+        underscoreKey = 'address_1';
+      }else if(underscoreKey =='address2'){
+        underscoreKey = 'address_2';
+      }
+      customerMeta['billing_'+underscoreKey]=data.billing[metaKey];
+    });
+    Object.keys(data.shipping).forEach( function( metaKey ){
+      var underscoreKey = Polymer.CaseMap.camelToDashCase( metaKey ).replace(/-/g,'_');
+      if(underscoreKey =='address1'){
+        underscoreKey = 'address_1';
+      }else if(underscoreKey =='address2'){
+        underscoreKey = 'address_2';
+      }
+      customerMeta['shipping_'+underscoreKey]=data.shipping[metaKey];
+    });
+    return customerMeta;
+  }
+  EDB.createObject( 
+    wpRest, 
+    'User', 
+    'users',
+    function loadData( data ){
+      if(!data) data = {};
+      
+      this.id = data.id == 'new' ? null : data.id;
+      this.name = data.name || '';
+      this.email = data.email;
+      // console.log(data.avatar_urls)
+      this.image = { src: (data.avatar_urls ? data.avatar_urls['96'] : null), id: null };
+      this.designerInfo = data.designer_meta ?{ isDesigner: data.designer_meta.is_designer, designerLevel: data.designer_meta.designer_level||'none' } : { isDesigner: false, designerLevel: 'none' };
+      this.customerInfo = loadCustomerMeta( data );
+      
+      return this;
+    },
+    function convertData(  ){
+      console.log('convert ser', this );
+      return {
+               id: this.id,
+               name: this.name,
+               email: this.email,
+               designer_meta: { 
+                 is_designer: this.designerInfo.isDesigner,
+                 designer_level: this.designerInfo.designerLevel
+               },
+               customer_meta: convertCustomerMeta( this.customerInfo )
+             }
+    }
+  );
+  
+  
+  EDB.createObject( 
+    wpRest, 
+    'Blog', 
+    'posts',
+    function loadData( data ){
+      if(!data) data = {};
+      this.id = data.id == 'new' ? null : data.id;
+      this.image = { src: data.featured_image||'', id:  data.featured_media };
+      this.title = splitTranslation(  data.title ? data.title.rendered  : ''  );
+      this.content = splitTranslation(  data.content ? data.content.rendered  : ''  );
+      return this;
+    },
+    function convertData(  ){
+      console.log('convert blog', this );
+      return {
+               id: this.id,
+               featured_media: this.image.id,
+               title: joinTranslation(this.title),
+               content: joinTranslation( this.content )
+             }
+    }
+  );
+    
+    
+    
+    
+
+    
+  }).call(window)
+  
+  
+</script>

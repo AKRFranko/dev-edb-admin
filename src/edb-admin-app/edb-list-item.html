@@ -1,0 +1,108 @@
+<link rel="import" href="../../bower_components/polymer/polymer.html">
+<!--<link rel="import" href="./users/edb-user-list.html">-->
+
+<dom-module id="edb-list-item">
+  <template>
+    <style include="edb-admin-styles"></style>
+    <style>
+      :host {
+        display: block;
+      }
+      
+
+     #listItem{
+       width:100%;
+       @apply(--layout-horizontal);
+       min-height:80px;
+       padding:10px 20px;
+     }
+     #image{
+       
+     }
+     #image iron-image{
+        
+        width:64px;
+        height:64px;
+        margin-right:20px;
+     }
+     #content{
+       @apply(--layout-vertical);
+       @apply(--layout-flex);
+       width:100%;
+     }
+     #actions{
+       @apply(--layout-vertical);
+     }
+     #actions paper-button{
+       font-size:11px;
+     }
+     
+     #image[hidden]{
+       display:none;
+     }
+     #title{
+       
+       @apply(--edb-list-item-title);
+     }
+     #editButton{
+       color:#999;
+     }
+     #deleteButton{
+       color:#e46363;
+     }
+    </style>
+   
+    <div id="listItem" class="list-item">
+      <div id="image" hidden$="{{!image}}" class="list-item-image">
+        <iron-image preload fade sizing="contain" src="{{image}}"></iron-image>
+        
+      </div>
+      <div id="content" class="list-item-content">
+        <div id="title" clas"list-item-title">{{title}}</div>
+        <content></content>
+      </div>
+      <div id="actions" class="list-item-actions">
+        <a href="{{editPath}}" tabindex="-1"><paper-icon-button icon="settings" id="editButton" class="edit">edit</paper-icon-button></a>
+        <a href="{{deletePath}}" tabindex="-1"><paper-icon-button icon="delete" id="deleteButton" class="delete">delete</paper-icon-button></a>
+      </div>
+    </div>
+    
+
+  </template>
+    
+    
+    
+    
+  <script>
+    Polymer({
+
+      is: 'edb-list-item',
+
+      properties: {
+       title: {
+         type: String,
+         notify: true
+       },
+       image: {
+         type: String,
+         notify: true,
+         value: null
+       },
+       editPath: {
+         type: String,
+         notify: true,
+         reflectToAttribute: true
+       },
+       deletePath: {
+         type: String,
+         notify: true,
+         reflectToAttribute: true
+       }
+      }
+      
+        
+      
+
+    });
+  </script>
+</dom-module>

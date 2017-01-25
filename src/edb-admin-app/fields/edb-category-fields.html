@@ -1,0 +1,36 @@
+<link rel="import" href="../../../bower_components/polymer/polymer.html">
+<!--<link rel="import" href="./users/edb-user-list.html">-->
+
+<dom-module id="edb-category-fields">
+  <template>
+    <style>
+      :host {
+        display: block;
+        box-sizing:border-box;
+    
+      }
+      </style>
+      
+      <edb-field label="Name" type="dualtext" value="{{object.name}}"></edb-field>
+      <edb-field label="Slug" type="text" value="{{object.slug}}"></edb-field>
+      
+      </template>
+        
+        
+        
+        
+      <script>
+        Polymer({
+    
+          is: 'edb-category-fields',
+          properties: {
+            object: {
+              type: Object,
+              notify: true,
+              value: null
+            }
+          }
+        });
+      </script>
+    </dom-module>
+    

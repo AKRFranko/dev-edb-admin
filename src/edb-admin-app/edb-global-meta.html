@@ -1,0 +1,48 @@
+<link rel="import" href="../../bower_components/polymer/polymer.html">
+
+    
+    
+  <script>
+    (function(){
+      if(!window.EDBGlobal){
+        window.EDBGlobal = {};
+      }
+      var instances = [];
+      var Klass = Polymer.Class({
+        is: 'edb-global-meta',
+        properties: {
+          name: {
+            type: String
+          },
+          value: {
+            type: Object,
+            value: function(){
+              return !this.name ? null : window.EDBGlobal[this.name];
+            },
+            observer: '__valueChanged'
+          }
+        },
+        __valueChanged: function( value ){
+          if(!this.name) return;
+          var name = this.name;
+          window.EDBGlobal[name] = value;
+          this.fire('value-changed', { value: value } )
+          instances.forEach( function( instance ){
+            // console.log('firing value change', this.name )
+            if( name == instance.name ){
+              instance.fire('value-changed', { value: value  });  
+            }
+          }, this )
+        },
+        ready: function(){
+          instances.push( this );
+        }
+        
+          
+        
+  
+      });
+      document.registerElement('edb-global-meta',Klass  );
+    })()
+    
+  </script>

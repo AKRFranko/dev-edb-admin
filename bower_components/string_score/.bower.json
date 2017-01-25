@@ -1,0 +1,15 @@
+{
+  "name": "string_score",
+  "homepage": "https://github.com/joshaven/string_score",
+  "version": "0.1.22",
+  "_release": "0.1.22",
+  "_resolution": {
+    "type": "version",
+    "tag": "v0.1.22",
+    "commit": "3b51216ccaa15a795df27502df5e8fbca554c0ab"
+  },
+  "_source": "git://github.com/joshaven/string_score.git",
+  "_target": "^0.1.22",
+  "_originalSource": "joshaven/string_score",
+  "_direct": true
+}

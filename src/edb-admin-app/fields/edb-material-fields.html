@@ -1,0 +1,44 @@
+<link rel="import" href="../../../bower_components/polymer/polymer.html">
+<!--<link rel="import" href="./users/edb-user-list.html">-->
+
+<dom-module id="edb-material-fields">
+  <template>
+    <style>
+      :host {
+        display: block;
+        box-sizing:border-box;
+    
+      }
+      </style>
+      
+     <edb-field label="Number" type="text" value="{{object.number}}"></edb-field>
+     <edb-field label="Name" type="dualtext" value="{{object.name}}"></edb-field>
+     <edb-field label="Composition" type="duallist" value="{{object.composition}}"></edb-field>
+     <edb-field label="Image" type="singleimage" value="{{object.image}}"></edb-field>
+      
+      </template>
+        
+        
+        
+        
+      <script>
+        Polymer({
+    
+          is: 'edb-material-fields',
+          properties: {
+            object: {
+              type: Object,
+              notify: true,
+              value: null
+            }
+          },
+          // observers: ['__log(object.*)'],
+          // __log: function( a ){
+          //   // console.log(a)
+          //   this.notifyPath(a.path,a.value);
+          // }
+          
+        });
+      </script>
+    </dom-module>
+    

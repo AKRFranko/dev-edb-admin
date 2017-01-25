@@ -1,0 +1,824 @@
+<link rel="import" href="../../bower_components/polymer/polymer.html">
+<!--<link rel="import" href="./users/edb-user-list.html">-->
+<dom-module id="edb-admin-app">
+  <template>
+    <style include="edb-admin-styles"></style>
+    <style>
+     /* :host {*/
+     /*   display: block;*/
+     /*   box-sizing:border-box;*/
+     /*   font-family:sans-serif;*/
+     /*   --paper-tabs-selection-bar-color:#111;*/
+     /*   color:#222;*/
+     /*   @apply(--paper-font-body1);*/
+     /* }*/
+      
+     /* :host *{*/
+     /*   box-sizing:border-box;*/
+     /* }*/
+     
+      
+      .menu-link.iron-selected {
+        background: #fff;
+        color:#000;
+      }
+      #mainMenu{
+        display:block;
+        width:100%;
+        @apply(--layout-vertical);
+      }
+      #loadblock{
+        position:fixed;
+        top:0;
+        left:256px;
+        bottom:0;
+        right:0;
+        width:calc(100% - 256px);
+        height:100%;
+        background:rgba(0,0,0,0.3);
+        
+        
+      }
+      #loadblock paper-spinner{
+        width:100px;
+        height:100px;
+        position:absolute;
+        top:50%;
+        left:50%;
+        margin-top:-50px;
+        margin-left:-50px;
+      }
+      
+      .menu-link{
+        font-size:11px;
+        text-transform:uppercase;
+        outline:none;
+        display:block;
+        boz-sizing:border-box;
+        padding:5px 20px 5px 30px;
+        text-decoration:none;
+        color:inherit;
+        @apply(--layout-horizontal);
+        -webkit-user-select: none;  
+        -moz-user-select: none;     
+        -ms-user-select: none;      
+        user-select: none;    
+        font-size:11px;
+        letter-spacing:0.1em;
+      }
+      .menu-link:before{
+        content:'- ';
+        margin-right:5px;
+      }
+      .menu-link iron-icon{
+        margin-right:20px;
+      }
+      .menu-link .label{
+        display:inline-block;
+      }
+      app-toolbar{
+        background:#fff ;
+      }
+      app-drawer app-toolbar{
+        background-color: #111;
+        color:#fff;
+      }
+      app-drawer{
+        --app-drawer-scrim-background: rgba(0, 0, 0, 0.5);
+        --app-drawer-content-container: {
+          background-color: #111;
+          color:#fff;
+       }
+       
+      }
+      app-drawer app-toolbar{
+        height:128px;
+      }
+      
+      #logo{
+        width:82px;
+        height:82px;
+        padding:0;
+      }
+      
+      .back{
+        box-sizing:border-box;
+        background:#999;
+        color:#fff;
+        text-transform:uppercase;
+        margin:0;
+        display:block;
+        width:100%;
+        text-align:left;
+        font-size:11px;
+        text-decoration:none;
+        padding:20px 20px;
+        border-radius:0;
+      }
+      
+      iron-selector .section{
+        margin:0;
+        opacity:0.5;
+        text-transform:uppercase;
+        font-size:11px;
+        letter-spacing:0.1em;
+        border-bottom:1px solid rgba(255,255,255,0.5);
+        padding:5px 20px;
+      }
+      
+      form{
+        padding:20px;
+        position:relative;
+      }
+      form .title{
+        margin-bottom:40px;
+        text-transform:uppercase;
+        font-weight:bold;
+        text-transform:uppercase;
+        letter-spacing:0.1em;
+      }
+      form ::content .subtitle{
+        text-transform:uppercase;
+        font-size:13px;
+        font-weight:bold;
+        letter-spacing:0.1em;
+        margin-bottom:40px;
+        margin-top:40px;
+        padding:0 20px;
+        border-bottom:1px dashed #ccc;
+      }
+      form ::content paper-tabs{
+        margin-bottom:20px;
+        margin-top:0;
+        
+      }
+      form paper-button{
+        background:#000;
+        color:#fff;
+        margin:40px;
+        padding:20px 40px;
+        float:right;
+        letter-spacing:0.1em;
+      }
+      paper-spinner{
+        margin-left:calc(50% - 14px);
+        margin-top:100px;
+        
+      }
+      form .show-code{
+        position:absolute;
+        top:20px;
+        right:20px;
+        color:#fff;
+        background:#f0f0f0;
+      }
+      /*edb-admin-app,app-drawer-layout,app-header-layout, app-header-layout ::content #contentContainer,neon-animated-pages,neon-animatable{*/
+      /*  height:100%;*/
+      /*}*/
+      
+      #messageToast {
+          width: 100%;
+          box-sizing: border-box;
+          margin: 0;
+          text-align: right;
+          background:#4caf50;
+          color:#fff;
+      }
+      #errorToast{
+        width: 100%;
+        box-sizing: border-box;
+        margin: 0;
+        text-align: right;
+        background:red;
+        color:#fff;
+      }
+      form,
+      edb-list-item{
+        max-width:1000px;
+        margin:0 auto;
+      }
+      form,edb-list-view{
+        min-height:calc(100vh - 64px);
+      }
+      neon-animatable{
+        width:100%;
+      }
+      #codeBox{
+        background:#000;
+        color:limegreen;
+        width:80%;
+        height:80%;
+        overflow:auto;
+      }
+    
+    
+    </style>
+    
+    <edb-global-meta name="countries" value="[[countries]]"></edb-global-meta>
+    <edb-global-meta name="states" value="[[states]]"></edb-global-meta>
+    <edb-global-meta name="selectedCountry" on-value-changed="__selectedCountryChanged"></edb-global-meta>
+    
+    <iron-ajax
+    auto
+    url="http://ws.geonames.org/countryInfo"
+    params='{"type":"JSON", "username":"elementdebase", "lang": "en"}'
+    handle-as="json"
+    last-response="{{geoCountries}}"
+    on-response="__handleCountries"
+    debounce-duration="300"></iron-ajax>
+    
+    <app-location id="appLocation" use-hash-as-path route="{{mainRoute}}"></app-location>
+    <app-route route="[[mainRoute]]" pattern="/:mode" data="{{routeData}}" tail="{{mainTail}}"></app-route>
+    <app-route route="[[mainTail]]" pattern="/:resource/:id" data="{{tailData}}" tail="{{subTail}}"></app-route>
+    
+    <edb-user     id="user"     loading="{{resourceLoading}}" items="{{users}}"      item-id="{{currentUserId}}"     item="{{currentUser}}"></edb-user>
+    <edb-slide    id="slide"    loading="{{resourceLoading}}" items="{{slides}}"     item-id="{{currenSlideId}}"     item="{{currentSlide}}"></edb-slide>
+    <edb-feature  id="feature"  loading="{{resourceLoading}}" items="{{features}}"   item-id="{{currentFeatureId}}"  item="{{currentFeature}}"></edb-feature>
+    <edb-page     id="page"     loading="{{resourceLoading}}" items="{{pages}}"      item-id="{{currentPageId}}"     item="{{currentPage}}"></edb-page>
+    <edb-blog     id="blog"     loading="{{resourceLoading}}" items="{{blogs}}"      item-id="{{currentBlogId}}"     item="{{currentBlog}}"></edb-blog>
+    <edb-lookbook id="lookbook" loading="{{resourceLoading}}" items="{{lookbooks}}"   item-id="{{currentLookbookId}}" item="{{currentLookbook}}"></edb-blog>
+    <edb-inspiration id="inspiration" loading="{{resourceLoading}}" items="{{inspirations}}"   item-id="{{currentInspirationId}}" item="{{currentInspiration}}"></edb-blog>
+    <edb-lookbook id="faq" loading="{{resourceLoading}}" items="{{faqs}}"   item-id="{{currentFaqId}}" item="{{currentFaq}}"></edb-blog>
+    <edb-material id="material" loading="{{resourceLoading}}" items="{{materials}}"  item-id="{{currentMaterialId}}" item="{{currentMaterial}}"></edb-material>
+    <edb-category id="category" loading="{{resourceLoading}}" items="{{categories}}" item-id="{{currenCategoryId}}"  item="{{currentCategory}}"></edb-category>
+    <edb-product  id="product"  loading="{{resourceLoading}}" items="{{products}}"   item-id="{{currenProductId}}"   item="{{currentProduct}}"></edb-product>
+    
+    <app-drawer-layout fullbleed>
+      <app-drawer>
+        <app-toolbar>
+          <iron-icon id="logo" icon="edb-icons:logo"></iron-icon>
+        </app-toolbar>
+        <div id="mainMenu">
+          <iron-selector selected="[[routeData.mode]]" attr-for-selected="data-mode" selectable="a">
+            <a id="homeLink" class="menu-link" data-mode="home" href="/#/home/" tabindex="-1">
+              <span class="label">Admin</span></a>
+            <a class="menu-link" data-mode="user" href="/#/user/" tabindex="-1">
+              <span class="label">Users</span></a>
+            
+            <div class="section">Home Page</div>
+            
+            <a class="menu-link" data-mode="slide" href="/#/slide/" tabindex="-1">
+              <span class="label">slides</span></a>
+            <a class="menu-link" data-mode="feature" href="/#/feature/" tabindex="-1">
+              <span class="label">features</span></a>
+              
+            <div class="section">Content</div>
+            
+            <a class="menu-link" data-mode="lookbook" href="/#/lookbook/" tabindex="-1">
+              <span class="label">lookbook</span></a>
+            <a class="menu-link" data-mode="inspiration" href="/#/inspiration/" tabindex="-1">
+              <span class="label">inspiration</span></a>
+            <a class="menu-link" data-mode="faq" href="/#/faq/" tabindex="-1">
+            <span class="label">faq</span></a>
+            <a class="menu-link" data-mode="page" href="/#/page/" tabindex="-1">
+              <span class="label">pages</span></a>
+            <a class="menu-link" data-mode="blog" href="/#/blog/" tabindex="-1">
+              <span class="label">blog</span></a>
+            <a class="menu-link" data-mode="form" href="/#/form/" tabindex="-1">
+              <span class="label">forms</span></a>
+            
+            <div class="section">Catalog</div>
+            
+            <a class="menu-link" data-mode="product" href="/#/product/" tabindex="-1">
+              <span class="label">products</span></a>
+            <a class="menu-link" data-mode="material" href="/#/material/" tabindex="-1">
+              <span class="label">materials</span></a>
+            <a class="menu-link" data-mode="category" href="/#/category/" tabindex="-1">
+              <span class="label">categories</span></a>
+            
+            <div class="section">Shop</div>
+            
+            <a class="menu-link" data-mode="order" href="/#/order/" tabindex="-1">
+              <span class="label">orders</span></a>
+          </iron-selector>
+        </div>
+      </app-drawer>
+      <app-header-layout>
+        <app-header id="mainHeader" fixed condenses effects="waterfall">
+          <!--<app-toolbar id="mainToolbar">-->
+          <!-- <paper-icon-button icon="edb-icons:logo" drawer-toggle></paper-icon-button>-->
+          <!--</app-toolbar>-->
+        </app-header>
+        
+        <neon-animated-pages selected='[[routeData.mode]]' attr-for-selected='data-mode' entry-animation='slide-from-right-animation' exit-animation='slide-left-animation' fallback-selection="home">
+          
+          <neon-animatable data-mode='home'>
+            Home
+          </neon-animatable>
+          
+          <neon-animatable data-mode='user'>
+            
+            <edb-list-view title="Users" new-path="/#/edit/user/new" sort="{{__sort('user',searchValue)}}">
+              <template is="dom-repeat" items="{{users}}" as="user">
+                <edb-list-item title="{{user.name}}" image="{{user.image.src}}" edit-path="/#/edit/user/{{user.id}}" delete-path="/#/delete/user/{{user.id}}">
+                  <p>{{user.email}}</p>
+                </edb-list-item>
+              </template>
+            </edb-list-view>
+          </neon-animatable><!-- user mode  -->
+          
+          <neon-animatable data-mode='slide'>
+            <edb-list-view title="Slides" new-path="/#/edit/slide/new" for="slides">
+              <template is="dom-repeat" items="{{slides}}" as="slide" sort="{{__sort('slide',searchValue)}}">
+                <edb-list-item title="{{__join(slide.title.en,slide.title.fr)}}" image="{{slide.image.src}}" edit-path="/#/edit/slide/{{slide.id}}" delete-path="/#/delete/slide/{{slide.id}}">
+                  <div class="subtitle">{{__join(slide.subtitle.en,slide.subtitle.fr)}}</div>
+                  <div class="url">{{slide.slide_url}}</div>
+                </edb-list-item>
+              </template>
+            </edb-list-view>
+          </neon-animatable><!-- slide mode  -->
+          
+          <neon-animatable data-mode='feature'>
+            <edb-list-view title="Feature Posts" new-path="/#/edit/feature/new">
+              <template is="dom-repeat" items="{{features}}" as="feature" sort="{{__sort('feature',searchValue)}}">
+                <edb-list-item title="{{__join(feature.title.en,feature.title.fr)}}" image="{{feature.image.src}}" edit-path="/#/edit/feature/{{feature.id}}" delete-path="/#/delete/feature/{{feature.id}}">
+                  <div class="url">{{feature.feature_url}}</div>
+                </edb-list-item>
+              </template>
+            </edb-list-view>
+          </neon-animatable><!-- feature mode  -->
+          
+          <neon-animatable data-mode='page'>
+            <edb-list-view title="Pages" new-path="/#/edit/page/new">
+              <template is="dom-repeat" items="{{pages}}" as="page" sort="{{__sort('page',searchValue)}}">
+                <edb-list-item title="{{__join(page.title.en,page.title.fr)}}" image="{{page.image.src}}" edit-path="/#/edit/page/{{page.id}}" delete-path="/#/delete/page/{{page.id}}"></edb-list-item>
+              </template>
+            </edb-list-view>
+          </neon-animatable><!-- page mode  -->
+          
+          <neon-animatable data-mode='blog'>
+            <edb-list-view title="Blog Posts" new-path="/#/edit/blog/new">
+              <template is="dom-repeat" items="{{blogs}}" as="blog" sort="{{__sort('blog',searchValue)}}">
+                <edb-list-item title="{{__join(blog.title.en,blog.title.fr)}}" image="{{blog.image.src}}" edit-path="/#/edit/blog/{{blog.id}}" delete-path="/#/delete/blog/{{blog.id}}"></edb-list-item>
+              </template>
+            </edb-list-view>
+          </neon-animatable><!-- blog mode  -->
+          
+          <neon-animatable data-mode='lookbook'>
+            <edb-list-view title="Lookbooks" new-path="/#/edit/lookbook/new">
+              <template is="dom-repeat" items="{{lookbooks}}" as="lookbook" sort="{{__sort('lookbook',searchValue)}}">
+                <edb-list-item title="{{__join(lookbook.title.en,lookbook.title.fr)}}" image="{{lookbook.image.src}}" edit-path="/#/edit/lookbook/{{lookbook.id}}" delete-path="/#/delete/lookbook/{{lookbook.id}}"></edb-list-item>
+              </template>
+              
+            </edb-list-view>
+          </neon-animatable><!-- lookbook mode  -->
+          
+          <neon-animatable data-mode='inspiration'>
+            <edb-list-view title="Inspirations" new-path="/#/edit/inspiration/new">
+              <template is="dom-repeat" items="{{inspirations}}" as="inspiration" sort="{{__sort('inspiration',searchValue)}}">
+                <edb-list-item title="{{__join(inspiration.title.en,inspiration.title.fr)}}" image="{{inspiration.image.src}}" edit-path="/#/edit/inspiration/{{inspiration.id}}" delete-path="/#/delete/inspiration/{{inspiration.id}}"></edb-list-item>
+              </template>
+            </edb-list-view>
+          </neon-animatable><!-- inspiration mode  -->
+          
+          <neon-animatable data-mode='faq'>
+            <edb-list-view title="FAQ" new-path="/#/edit/faq/new">
+              <template is="dom-repeat" items="{{faqs}}" as="faq" sort="{{__sort('faq',searchValue)}}">
+                <edb-list-item title="{{__join(faq.title.en,faq.title.fr)}}" image="{{faq.image.src}}" edit-path="/#/edit/faq/{{faq.id}}" delete-path="/#/delete/faq/{{faq.id}}"></edb-list-item>
+              </template>
+              
+            </edb-list-view>
+          </neon-animatable><!-- faq mode  -->
+          
+          <neon-animatable data-mode='material'>
+            <edb-list-view title="Materials" new-path="/#/edit/material/new">
+              <template is="dom-repeat" items="{{materials}}" as="material" sort="{{__sort('material',searchValue)}}">
+                <edb-list-item from="materials" title="{{material.number}}" image="{{material.image.src}}" edit-path="/#/edit/material/{{material.id}}" delete-path="/#/delete/material/{{material.id}}">
+                  <div class="name">{{__join(material.name.en,material.name.fr)}}</div>
+                </edb-list-item>
+              </template>
+              <!--<paper-spinner active$="{{!materials.length}}"></paper-spinner>-->
+            </edb-list-view>
+          </neon-animatable><!-- material mode  -->
+          
+          <neon-animatable data-mode='category'>
+            <edb-list-view title="Categories" new-path="/#/edit/category/new" for="categories">
+              <template is="dom-repeat" items="{{categories}}" as="category" sort="{{__sort('category',searchValue)}}">
+                <edb-list-item from="categories" title="{{__join(category.name.en,category.name.fr)}}" edit-path="/#/edit/category/{{category.id}}" delete-path="/#/delete/category/{{category.id}}">
+                  <div class="description">{{__join(category.description.en,category.description.fr)}}</div>
+                </edb-list-item>
+              </template>
+              <!--<paper-spinner active$="{{!categories.length}}"></paper-spinner>-->
+            </edb-list-view>
+          </neon-animatable><!-- category mode  -->
+          
+          <neon-animatable data-mode='product'>
+            <edb-list-view title="Products" new-path="/#/edit/product/new" for="products">
+              <template is="dom-repeat" items="{{products}}" as="product" sort="{{__sort('product',searchValue)}}">
+                <edb-list-item from="products" title="{{product.name}}" image="{{product.featuredImage.src}}" edit-path="/#/edit/product/{{product.id}}" delete-path="/#/delete/product/{{product.id}}">
+                  <div class="meta">reg: {{product.regularPrice}}</div>
+                  <div class="meta">sale: {{product.salePrice}}</div>
+                </edb-list-item>
+              </template>
+              <!--<paper-spinner active$="{{!products.length}}"></paper-spinner>-->
+            </edb-list-view>
+          </neon-animatable><!-- product mode  -->
+          
+          <!--<neon-animatable data-mode='customer'>-->
+          <!--  <edb-customer id="customer" items="{{customers}}" itemId="{{currentCustomerId}}" item="{{currentCustomer}}"></edb-customer>-->
+          <!--  <edb-list-view title="Customers" new-path="/#/edit/customer/new" for="customers">-->
+          <!--    <template is="dom-repeat" items="{{customers}}" as="customer">-->
+          <!--      <edb-list-item from="products" title="{{customer.name}}" image="{{customer.images.0.src}}" edit-path="/#/edit/customer/{{customer.id}}" delete-path="/#/delete/customer/{{customer.id}}"></edb-list-item>-->
+          <!--    </template>-->
+          <!--    <paper-spinner active$="{{!customers.length}}"></paper-spinner>-->
+          <!--  </edb-list-view>-->
+          <!--</neon-animatable><!-- customer mode  -->
+          
+          <neon-animatable data-mode='delete'>
+            <iron-icon icon="warning" class="hugeicon"></iron-icon>
+            <div class="hugetext">Are you certain you want to delete {{tailData.resource}} ID#{{tailData.id}}</div>
+            <paper-button class="hugebutton danger" on-tap="__handleDelete">DELETE</paper-button>
+            <a href="/#/{{tailData.resource}}">
+              <paper-button class="hugebutton">CANCEL</paper-button>
+            </a>
+          </neon-animatable><!-- delete mode -->
+          
+          <neon-animatable data-mode='edit'>
+            
+            <a class="back" href="/#/{{tailData.resource}}/"><iron-icon icon="chevron-left"></iron-icon> back</a>
+            
+            
+            <iron-pages selected="{{tailData.resource}}" attr-for-selected="data-resource">
+              
+              <div data-resource="user">
+                <form on-submit="__submitForm">
+                  <div class="title">{{__computeFormTitle('User',tailData.id)}}</div>
+                  <paper-icon-button class="show-code" icon="code" on-tap="__showJSONItem"></paper-icon-button>
+                  <edb-user-fields object="{{currentUser}}"></edb-user-fields>
+                  <paper-button type="submit" on-tap="__submitForm">save</paper-button>
+                </form>
+              </div>
+              
+              <div data-resource="slide">
+                <form on-submit="__submitForm">
+                  <paper-icon-button class="show-code" icon="code" on-tap="__showJSONItem"></paper-icon-button>
+                  <div class="title">{{__computeFormTitle('Slide',tailData.id)}}</div>
+                  <edb-slide-fields object="{{currentSlide}}"></edb-slide-fields>
+                  
+                  <paper-button type="submit" on-tap="__submitForm">save</paper-button>
+                </form>
+              </div>
+              
+              <div data-resource="feature">
+                <form on-submit="__submitForm">
+                  <paper-icon-button class="show-code" icon="code" on-tap="__showJSONItem"></paper-icon-button>
+                  <div class="title">{{__computeFormTitle('Feature',tailData.id)}}</div>
+                  <edb-feature-fields object="{{currentFeature}}"></edb-feature-fields>
+                  <paper-button type="submit" on-tap="__submitForm">save</paper-button>
+                </form>
+              </div>
+              
+              <div data-resource="page">
+                <form on-submit="__submitForm">
+                  <paper-icon-button class="show-code" icon="code" on-tap="__showJSONItem"></paper-icon-button>
+                  <div class="title">{{__computeFormTitle('Page',tailData.id)}}</div>
+                  <edb-page-fields object="{{currentPage}}"></edb-page-fields>
+                  <paper-button type="submit" on-tap="__submitForm">save</paper-button>
+                </form>
+              </div>
+              
+              <div data-resource="blog">
+                <form on-submit="__submitForm">
+                  <paper-icon-button class="show-code" icon="code" on-tap="__showJSONItem"></paper-icon-button>
+                  <div class="title">{{__computeFormTitle('Blog',tailData.id)}}</div>
+                  <edb-blog-fields object="{{currentBlog}}"></edb-blog-fields>
+                  <paper-button type="submit" on-tap="__submitForm">save</paper-button>
+                </form>
+              </div>
+              
+              <div data-resource="lookbook">
+                <form on-submit="__submitForm">
+                  <paper-icon-button class="show-code" icon="code" on-tap="__showJSONItem"></paper-icon-button>
+                  <div class="title">{{__computeFormTitle('Lookbook',tailData.id)}}</div>
+                  <edb-blog-fields object="{{currentLookbook}}"></edb-blog-fields>
+                  <paper-button type="submit" on-tap="__submitForm">save</paper-button>
+                </form>
+              </div>
+              
+              <div data-resource="inspiration">
+                <form on-submit="__submitForm">
+                  <paper-icon-button class="show-code" icon="code" on-tap="__showJSONItem"></paper-icon-button>
+                  <div class="title">{{__computeFormTitle('Inspirations',tailData.id)}}</div>
+                  <edb-blog-fields object="{{currentInspiration}}"></edb-blog-fields>
+                  <paper-button type="submit" on-tap="__submitForm">save</paper-button>
+                </form>
+              </div>
+              
+              <div data-resource="faq">
+                <form on-submit="__submitForm">
+                  <paper-icon-button class="show-code" icon="code" on-tap="__showJSONItem"></paper-icon-button>
+                  <div class="title">{{__computeFormTitle('FAQ',tailData.id)}}</div>
+                  <edb-blog-fields object="{{currentFaq}}"></edb-blog-fields>
+                  <paper-button type="submit" on-tap="__submitForm">save</paper-button>
+                </form>
+              </div>
+              
+              <div data-resource="material">
+                <form on-submit="__submitForm">
+                  <paper-icon-button class="show-code" icon="code" on-tap="__showJSONItem"></paper-icon-button>
+                  <div class="title">{{__computeFormTitle('Material',tailData.id)}}</div>
+                  <edb-material-fields object="{{currentMaterial}}"></edb-material-fields>
+                  <paper-button type="submit" on-tap="__submitForm">save</paper-button>
+                </form>
+              </div>
+              
+              <div data-resource="category">
+                <form on-submit="__submitForm">
+                  <paper-icon-button class="show-code" icon="code" on-tap="__showJSONItem"></paper-icon-button>
+                  <div class="title">{{__computeFormTitle('Category',tailData.id)}}</div>
+                  <edb-category-fields object="{{currentCategory}}"></edb-category-fields>
+                  <paper-button type="submit" on-tap="__submitForm">save</paper-button>
+                </form>
+              </div>
+              
+              <div data-resource="product">
+                <form on-submit="__submitForm">
+                  <paper-icon-button class="show-code" icon="code" on-tap="__showJSONItem"></paper-icon-button>
+                  <div class="title">{{__computeFormTitle('Product',tailData.id)}}</div>
+                  <edb-product-fields materials="[[materials]]" categories="[[categories]]" object="{{currentProduct}}"></edb-product-fields>
+                  <paper-button type="submit" on-tap="__submitForm">save</paper-button>
+                </form>
+              </div>
+              
+            </iron-pages>
+            
+          </neon-animatable><!-- edit mode  -->
+          
+        </neon-animated-pages>
+        <div id="loadblock" hidden$="{{!resourceLoading}}">
+          <paper-spinner active="{{resourceLoading}}"></paper-spinner>
+        </div>
+        <paper-toast id="messageToast"></paper-toast>
+        <paper-toast id="errorToast"></paper-toast>  
+      </app-header-layout>
+      
+      <app-drawer-layout>
+        
+        <paper-dialog id="codeBox">
+            <pre id="jsonBox"></pre>
+        </paper-dialog>
+        
+      
+  </template>
+  <script>
+    Polymer({
+
+      is: 'edb-admin-app',
+
+      properties: {
+        
+    
+        
+        materials: {
+          type: Object,
+          notify: true
+        },
+        categories: {
+          type: Object,
+          notify: true
+        },
+        products: {
+          type: Object,
+          notify: true
+        },
+        slides: {
+          type: Object,
+          notify: true
+        },
+        users: {
+          type: Object,
+          notify: true
+        },
+        features: {
+          type: Object,
+          notify: true
+        },
+        blogs: {
+          type: Object,
+          notify: true
+        },
+        pages: {
+          type: Object,
+          notify: true
+        },
+        orders: {
+          type: Object,
+          notify: true
+        }
+        
+      },
+      
+      observers: ['__onRouteChange(mainRoute)'],
+      __selectedCountryChanged: function(event){
+        var ajax = document.createElement('iron-request');
+        console.log('selectedCountry',event.detail.value)
+        if(event.detail.value){
+          ajax.send({
+            url: "http://api.geonames.org/children?username=elementdebase&type=JSON&geonameId="+event.detail.value
+          }).then( function( data){
+            this.__handleStates( JSON.parse(ajax.response) );
+            
+          }.bind(this))  
+        }
+
+      },
+      // __computeGeoStateParams: function( selectedCountry ){
+      //   if(selectedCountry){
+      //     return { type: 'JSON', username: 'elementdebase', lang:'en', geonameId: selectedCountry };  
+      //   }
+      // },
+      __handleStates: function(geoStates){
+        var states = geoStates.geonames.map( function( n ){
+          return { name: n.name, code: n.adminCode1, geoid: n.geonameId };
+        });
+        this.set('states', this.geoStates );
+      },
+      __handleCountries: function(){
+        
+        var countries = this.geoCountries.geonames.map( function( n ){
+                          return { name: n.countryName, code: n.countryCode, geoid: n.geonameId };
+                        });
+        // this.$.metaCountries.value=countries;
+        // this.$.metaCountries.fire('value-changed', { value: countries } );
+        this.set('countries', countries );
+        
+      },
+      // handleResponse: function( response ){
+      //   this.set('countries',this.countriesResponse.geonames.map( function( n ){
+      //                         return { name: n.countryName, code: n.countryCode };
+      //                       }));
+        
+      // },
+      __computeFormTitle: function( r, i ){
+        if( i == 'new'){
+          return 'New ' + r;
+        }else{
+          return 'Editing '+ r+ ' #' + i;
+        }
+      },
+      log: function( thing, a ){
+        console.log('log:', thing, a);
+      },
+      __join: function( a, b ){
+        return (a||b||'') +  ( b ?  ' / ' +b : '');
+      },
+      
+      
+      setup: function( info ){
+        this.set('blog.name', info.name );
+        this.set('blog.description', info.description );
+        this.set('blog.homeUrl', info.home );
+        
+        
+      },
+      teardown: function( error ){
+        console.log(error);
+      },
+      __handleRefresh: function( event ){
+        var parent = Polymer.dom(event).rootTarget.parentNode;
+        var resource = parent.getAttribute('data-mode');
+        
+        this.$[resource].refresh().then( function(){
+          this.__notifySuccess('Refreshed!');
+        }.bind(this))
+      },
+      __onRouteChange: function( route ){
+        
+        if(this.routeData){
+          
+          if(this.$[this.routeData.mode] && this.$[this.routeData.mode].refresh){
+            this.$[this.routeData.mode].refresh();
+            // this.$[this.routeData.mode].itemId = null;
+          }else if(this.routeData.mode == 'edit' || this.routeData.mode == 'delete' ){
+            this.$[this.tailData.resource].itemId = this.tailData.id;
+          }
+        }
+        if(!this.get('lastRoute')){
+          this.set('lastRoute', route );  
+        }
+        
+        
+      },
+      __goBack: function(e ){
+          e.preventDefault();
+          var lastRoute= this.get('lastRoute');
+          console.log('goback',"/#"+lastRoute.path, this.mainRoute)
+          window.location.href="/#"+lastRoute.path;
+      },
+      
+      __showJSONItem: function(e){
+        var resource = Polymer.dom(e).localTarget.parentNode.parentNode.getAttribute('data-resource');
+        var data = this.$[resource].item.data;
+        var contents =  JSON.stringify( data, null, 2 );
+        this.$.jsonBox.innerHTML = contents;
+        this.$.codeBox.open();
+      },
+      __notifySuccess: function( message ){
+        this.$.messageToast.text = message;
+        this.$.messageToast.open();
+      },
+      __notifyFailure: function( message ){
+        this.$.errorToast.text = message;
+        this.$.errorToast.open();
+        
+      },
+      __submitForm: function( event ){
+        var root = Polymer.dom(event).rootTarget;
+        var parent = root.parentNode.parentNode;
+        var resource = parent.getAttribute('data-resource');
+        var ref = this.$[resource];
+        if(ref){
+          
+          ref.item.save().then( function( saved ){
+            this.__notifySuccess('Saved!');
+            ref.refresh();
+            if(ref.itemId == 'new'){
+              window.location.href = '/#/edit/'+resource+'/'+saved.id;
+            }else{
+              // window.location.href = '/#/edit/'+resource+'/'+saved.id;
+              // window.location.reload()
+              // this.notifyPath('current'+resource.slice(0,1).toUpperCase() + resource.slice(1), saved );
+            }
+          }.bind(this)).catch( function(e){
+            this.__notifyFailure('Error! ' + e.message );;
+            console.log('error!', e );
+          }.bind(this));
+        }
+        console.log('parent', parent);
+      },
+      _sortList: function( prop ) {  
+        return function( a, b){
+          var aScore = JaroWinkler.distance( a[prop],{casesensitive: false });
+          var bScore = JaroWinkler.distance( b[prop],{casesensitive: false })
+          return aScore < bScore ? -1 : bScore < aScore ? 1 : 0;
+        }
+      },
+      // __handleCreate: function(event){
+      //   var targetId = event.detail.list.getAttribute('for');
+      //   var target = this.$[targetId];
+      //   if(target){
+      //       target.itemId = 'new';
+      //   }
+      //   // console.log(target.item)
+      // },
+      // __handleEdit: function(event){
+      //   var as = Polymer.dom(event).localTarget.parentNode.querySelector('template').as;
+      //   var sourceId = event.detail.listItem.getAttribute('from');
+      //   var source = this.$[sourceId];
+      //   if(source){
+      //     var id = event.model[as].id;
+      //     source.itemId = id;
+      //     // console.log('__hand leEdit',source.itemId)
+      //   }
+      // },
+      __handleDelete: function(event){
+        var resource = this.tailData.resource;
+        var ref =  this.$[resource];
+        var item = ref.item;
+        if(ref.item.delete){
+          ref.item.delete().then( function(){
+            this.__notifySuccess('Deleted!');
+            this.async( function(){
+              window.location.href = "/#/"+resource+'/';  
+            },1000);
+            
+          }.bind(this)).catch( function(e){
+            this.__notifyFailure('Error! ' + e.message );;
+            console.log('error!', e );
+          })
+        }
+        
+        console.log('__handleDelete', item)
+      },
+      
+      ready: function(){
+      
+        if(!this.route){
+          this.set('route', this.$.appLocation.route);
+        }
+        
+        
+        this.async(function() {
+          // If the path is blank, redirect to /
+          if (!this.mainRoute.path) {
+            this.$.homeLink.click();
+          }
+        }.bind(this));
+       
+       Array.prototype.slice.call(this.querySelectorAll('edb-list-view')).forEach( function( lv ){
+         lv.addEventListener('refresh', this.__handleRefresh.bind(this) );
+       }, this );
+      
+      
+      /* Instantly refresh cross-dependent resources */
+      this.$.material.refresh();
+      // this.$.product.refresh();
+      this.$.category.refresh();
+      // this.$.slide.refresh();
+      
+        Polymer.__notifyFailure = this.__notifyFailure.bind(this);
+      }
+
+    });
+  </script>
+</dom-module>

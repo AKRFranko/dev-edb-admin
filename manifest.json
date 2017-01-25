@@ -1,0 +1,6 @@
+{
+  "name": "edb-admin",
+  "short_name": "edb-admin",
+  "start_url": "/",
+  "display": "standalone"
+}

@@ -1,0 +1,33 @@
+{
+  "name": "edb-admin",
+  "main": "index.html",
+  "dependencies": {
+    "polymer": "Polymer/polymer#^1.4.0",
+    "app-layout": "PolymerElements/app-layout#^0.10.6",
+    "app-route": "PolymerElements/app-route#^0.9.3",
+    "iron-elements": "PolymerElements/iron-elements#^1.0.10",
+    "paper-elements": "PolymerElements/paper-elements#^1.0.7",
+    "querystring-json": "^0.3.11",
+    "fuse.js": "fuse#^2.5.0",
+    "string_score": "joshaven/string_score#^0.1.22",
+    "neon-animation": "PolymerElements/neon-animated-pages#^1.2.4",
+    "Sortable": "sortablejs#^1.4.2",
+    "paper-spinner": "PolymerElements/paper-spinner#^1.2.1",
+    "iron-collapse": "PolymerElements/iron-collapse#^1.3.0",
+    "paper-contact": "Collaborne/paper-contact#^1.0.11",
+    "json-box": "sbeleidy/json-box#^0.0.1",
+    "paper-dialog": "PolymerElements/paper-dialog#^1.1.0",
+    "syntax-highlight": "1000ch/syntax-highlight#^1.0.0",
+    "iron-ajax": "PolymerElements/iron-ajax#^1.4.3",
+    "iron-meta": "PolymerElements/iron-meta#^1.1.2",
+    "paper-dropdown-menu": "PolymerElements/paper-dropdown-menu#^1.4.3",
+    "paper-listbox": "PolymerElements/paper-listbox#^1.1.2",
+    "paper-item": "PolymerElements/paper-item#^1.2.1"
+  },
+  "devDependencies": {
+    "iron-component-page": "PolymerElements/iron-component-page#^1.0.0",
+    "iron-demo-helpers": "PolymerElements/iron-demo-helpers#^1.0.0",
+    "web-component-tester": "^4.0.0",
+    "webcomponentsjs": "webcomponents/webcomponentsjs#^0.7.0"
+  }
+}

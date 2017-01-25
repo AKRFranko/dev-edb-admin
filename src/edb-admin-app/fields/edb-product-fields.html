@@ -1,0 +1,225 @@
+<link rel="import" href="../../../bower_components/polymer/polymer.html">
+<!--<link rel="import" href="./users/edb-user-list.html">-->
+
+<dom-module id="edb-product-fields">
+  <template>
+    <style include="edb-admin-styles"></style>
+    <style>
+      :host {
+        display: block;
+        box-sizing:border-box;
+    
+      }
+      paper-button.toggler{
+        position:relative;
+        width:100%;
+        margin: 0 0 20px 0;
+        padding:20px;
+        background: #fff;
+        color: #000;
+        border-radius: 0;
+        border-bottom: 1px solid #ccc;
+        @apply(--layout-horizontal);
+      }
+      paper-button.toggler iron-image{
+          
+          width:60px;
+          height:60px;
+          
+      }
+      paper-tabs{
+        margin-top:-20px;
+      }
+      .reg-price,.sale-price,.stock-qty{
+        margin-right:20px;
+      }
+      .number{
+        @apply(--paper-font-title);
+        margin-left:20px;
+      }
+      iron-collapse{
+        padding-bottom:100px;
+      }
+      
+       
+      </style>
+      <iron-localstorage name="edb-admin-product-tab" value="{{productTab}}"></iron-localstorage>
+      
+      <paper-tabs selected="{{productTab}}" attr-for-selected="name" fallback-selection="info">
+          <paper-tab name="info">General</paper-tab>  
+          <paper-tab name="images">Images</paper-tab>  
+          <paper-tab name="variations">Variations</paper-tab>  
+      </paper-tabs>
+      
+      <iron-pages selected="{{productTab}}" attr-for-selected="data-section">
+        
+        <div data-section="info">
+          <edb-field label="Name" type="text" value="{{object.name}}"></edb-field>
+          <edb-field label="Description" type="dualtextarea" value="{{object.description}}"></edb-field>
+          <edb-field label="Regular Price" type="money" value="{{object.regularPrice}}"></edb-field>
+          <edb-field label="Sale Price" type="money" value="{{object.salePrice}}"></edb-field>
+          <edb-field label="Categories" type="select" choices="{{categories}}" value="{{object.categories}}"></edb-field>    
+          <div class="subtitle">Why We Love</div>
+          <edb-field label="Title" type="dualtext" value="{{object.whyWeLoveTitle}}"></edb-field>
+          <edb-field label="Content" type="dualtextarea" value="{{object.whyWeLoveContent}}"></edb-field>
+        </div>
+        
+        <div data-section="images">
+          <edb-field label="Product Featured Image" type="singleimage" value="{{object.featuredImage}}"></edb-field>
+          <edb-field label="Slides" type="multiimage" value="{{object.images}}"></edb-field>
+          <edb-field label="Wireframe" type="singleimage" value="{{object.wireframe}}"></edb-field>
+          <edb-field label="Anatomy (EN)" type="singleimage" value="{{object.anatomyEn}}"></edb-field>
+          <edb-field label="Anatomy (EN)" type="singleimage" value="{{object.anatomyFr}}"></edb-field>
+          
+          
+        </div>
+        <div data-section="variations">
+          <edb-field label="Available Materials" type="select" choices="[[materials]]" compare="number" value="{{object.availableMaterials}}"></edb-field>    
+          
+          <template is="dom-repeat" items="[[object.availableVariations]]" as="variation">
+            <div class="variation">
+            <paper-button class="toggler" on-click="toggleCollapse">
+              <iron-image fade src="[[__computeMaterialSrc(variation.materialNumber,materials)]]"></iron-image>
+              <div class="number">#[[variation.materialNumber]]</div>
+              <div class="spacer"></div>
+              <div class="reg-price">[[__renderMoney(variation.regularPrice,'reg: ')]]</div>
+              <div class="sale-price">[[__renderMoney(variation.salePrice,'sale: ')]]</div>
+              <div class="stock-qty">STOCK: [[variation.stockQuantity]]</div>
+              
+              
+            </paper-button>
+            <iron-collapse>
+              <edb-field label="Regular Price" type="money" value="{{variation.regularPrice}}"></edb-field>
+              <edb-field label="Sale Price" type="money" value="{{variation.salePrice}}"></edb-field>
+              <edb-field label="Stock qty" type="number" value="{{variation.stockQuantity}}"></edb-field>
+              
+              <edb-field label="Variation Image {{index}}" type="singleimage" value="{{variation.image}}"></edb-field>
+            </iron-collapse>
+            
+            
+            
+            </div>
+          </template>
+          
+        </div>
+      </iron-pages>
+      
+      </template>
+        
+        
+        
+        
+      <script>
+        Polymer({
+    
+          is: 'edb-product-fields',
+          properties: {
+            object: {
+              type: Object,
+              notify: true,
+              observer: '__logChange'
+            },
+            materials: {
+              type: Array,
+              notify: true
+            },
+            categories: {
+              type: Array,
+              notify: true
+            },
+            availableVariations: {
+              type: Array,
+              notify: true,
+              value: function(){ return []; }
+            }
+            
+          },
+          observers: [
+            // '__normalizeVariation(object.availableVariations,materials)',
+            '__availableMaterialsChanged(object.availableMaterials,object.availableMaterials.*)',
+         
+            ],
+          __computeMaterialSrc: function( n ){
+              var m = this.__findMaterialByNumber( n );
+              if(m) return m.image.src;
+              return null;
+            },
+          __findMaterialByNumber: function( n ){
+            return (this.materials ? this.materials : []).filter( function( m ){ return m.number == n})[0];
+          },
+          __findVariationByMaterialNumber: function( m ){
+            return (this.object ? this.object.variations : []).filter( function( v ){ return v.materialNumber == m;} )[0];
+          },
+         
+          __renderMoney: function( v , pre){
+            if(!v && v !== 0 ) v = 0;;
+            return pre + ' $'+(Number(v).toFixed(2));///
+          },
+          // __normalizeVariation: function( splices, n  ){
+          //   if(splices.path == 'object.availableVariations'){
+          //     splices.value.forEach( function( val, i ){
+          //       if(!val.material){
+          //         val.material = this.__findMaterialByNumber( val.materialNumber );
+          //       }
+          //     }, this );
+          //   }
+          // },
+          __availableMaterialsChanged: function( splices ){
+            if(this.object){
+              var availableMaterials = this.object.availableMaterials ||[];
+              
+              var variations = this.object.variations|| [];
+              
+              var findExisting = function( materialNumber ){
+                var found = variations.filter( function( v ){
+                  return v.materialNumber == materialNumber;
+                });
+                if(!!found.length) return found[0];
+                return null;
+              }
+              
+              var updated = [];
+              this.set('object.availableVariations', [] );
+              availableMaterials.forEach( function(materialNumber, i){
+                var variation = findExisting(materialNumber);
+                
+                var material = this.__findMaterialByNumber( materialNumber );
+                if(!variation){
+                  variation = { regularPrice: null, salePrice: null, stockQuantity: 0, material: material, materialNumber: material.number };
+                }else{
+                  variation.material = material;
+                  variation.materialNumber = materialNumber;
+                }
+                this.push('object.availableVariations', variation );
+              }, this );
+              
+            }
+            
+            
+          },
+          
+          __logChange: function( o ){
+            console.log('product', o )
+          },
+          toggleCollapse: function( e ){
+            var target = Polymer.dom(e).path.filter(  function( n ){
+              return n.nodeName == 'PAPER-BUTTON' && n.classList.contains('toggler');
+            })[0];
+            // console.log('root',Polymer.dom(e).rootTarget)
+            // console.log('local',Polymer.dom(e).localTarget)
+            // console.log('path',Polymer.dom(e).path)
+            var target = target.parentNode.querySelector('iron-collapse');
+            
+            if(!!target && target.toggle){
+              target.toggle();    
+            }
+            
+            
+          },
+          ready: function(){
+            // this.__availableMaterialsChanged( {base: this.object.availableMaterials })
+          }
+        });
+      </script>
+    </dom-module>
+    

@@ -1,0 +1,38 @@
+<link rel="import" href="../../../bower_components/polymer/polymer.html">
+<!--<link rel="import" href="./users/edb-user-list.html">-->
+
+<dom-module id="edb-slide-fields">
+  <template>
+    <style>
+      :host {
+        display: block;
+        box-sizing:border-box;
+    
+      }
+      </style>
+      
+      <edb-field label="Title" type="dualtext" value="{{object.title}}"></edb-field>
+      <edb-field label="Subtitle" type="dualtext" value="{{object.subtitle}}"></edb-field>
+      <edb-field label="URL" type="url" value="{{object.slide_url}}"></edb-field>
+      <edb-field label="Image" type="singleimage" value="{{object.image}}"></edb-field>
+      
+      </template>
+        
+        
+        
+        
+      <script>
+        Polymer({
+    
+          is: 'edb-slide-fields',
+          properties: {
+            object: {
+              type: Object,
+              notify: true,
+              value: null
+            }
+          }
+        });
+      </script>
+    </dom-module>
+    

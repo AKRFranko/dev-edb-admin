@@ -1,0 +1,81 @@
+<link rel="import" href="../../../bower_components/polymer/polymer.html">
+<!--<link rel="import" href="./users/edb-user-list.html">-->
+
+<dom-module id="edb-user-fields">
+  <template>
+    <style>
+      :host {
+        display: block;
+        box-sizing:border-box;
+    
+      }
+      </style>
+      
+      <edb-field label="Name" type="text" value="{{object.name}}"></edb-field>
+      <edb-field label="Email" type="text" value="{{object.email}}"></edb-field>
+      <edb-field label="Phone" type="text" value="{{object.phone}}"></edb-field>
+      
+      <edb-field label="Avatar" type="singleimage" value="{{object.avatar}}"></edb-field>
+
+      <div class="subtitle">Special</div>
+      
+      <edb-field label="Designer Level" type="radio" choices="{{designerLevels}}" value="{{object.designerInfo.designerLevel}}"></edb-field>
+      
+      
+      
+      <div class="subtitle">Billing</div>
+      <iron-meta key="countries" value="{{countries}}"></iron-meta>
+      <edb-field label="First Name" type="text" value="{{object.customerInfo.billing.firstName}}"></edb-field>
+      <edb-field label="Last Name" type="text" value="{{object.customerInfo.billing.lastName}}"></edb-field>
+      <edb-field label="Email" type="text" value="{{object.customerInfo.billing.email}}"></edb-field>
+      <edb-field label="Phone" type="text" value="{{object.customerInfo.billing.phone}}"></edb-field>
+      <edb-field label="Address" type="text" value="{{object.customerInfo.billing.address1}}"></edb-field>
+      <edb-field label="Suite/Apt" type="text" value="{{object.customerInfo.billing.address2}}"></edb-field>
+      <edb-field label="City" type="text" value="{{object.customerInfo.billing.city}}"></edb-field>
+      <edb-field label="Country" type="country" value="{{object.customerInfo.billing.country}}"></edb-field>
+      <edb-field label="State/Province" type="state" value="{{object.customerInfo.billing.state}}"></edb-field>
+      <edb-field label="Postal Code" type="countri" value="{{object.customerInfo.billing.postcode}}"></edb-field>
+      
+      
+      <div class="subtitle">Shipping</div>
+      
+      <edb-field label="First Name" type="text" value="{{object.customerInfo.shipping.firstName}}"></edb-field>
+      <edb-field label="Last Name" type="text" value="{{object.customerInfo.shipping.lastName}}"></edb-field>
+      <edb-field label="Address" type="text" value="{{object.customerInfo.shipping.address1}}"></edb-field>
+      <edb-field label="Suite/Apt" type="text" value="{{object.customerInfo.shipping.address2}}"></edb-field>
+      <edb-field label="City" type="text" value="{{object.customerInfo.shipping.city}}"></edb-field>
+      <edb-field label="Country" type="country" value="{{object.customerInfo.shipping.country}}"></edb-field>
+      <edb-field label="State/Province" type="state" value="{{object.customerInfo.shipping.state}}"></edb-field>
+      <edb-field label="Postal Code" type="countri" value="{{object.customerInfo.shipping.postcode}}"></edb-field>
+      
+      
+      
+      
+      </template>
+        
+        
+        
+        
+      <script>
+        Polymer({
+    
+          is: 'edb-user-fields',
+          properties: {
+            designerLevels: {
+              type: Array,
+              value: ['none','vip','vvip','vvvip']
+            },
+            object: {
+              type: Object,
+              notify: true,
+              value: function(){
+                return {};
+              }
+          
+            }
+          },
+          
+        });
+      </script>
+    </dom-module>
+    

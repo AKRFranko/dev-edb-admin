@@ -1,0 +1,64 @@
+<link rel="import" href="../../bower_components/polymer/polymer.html">
+<!--<link rel="import" href="./users/edb-user-list.html">-->
+
+<dom-module id="edb-country-select">
+  <template>
+    <style include="edb-admin-styles"></style>
+    <style>
+      
+    </style>
+   
+    
+    
+
+  </template>
+    
+    
+    
+    
+  <script>
+    Polymer({
+
+      is: 'edb-country-select',
+
+      properties: {
+       code: {
+         type: String,
+         notify: true
+       },
+       name: {
+         type: String,
+         notify: true
+       },
+       countries: {
+         type: Array,
+         notify: true
+       }
+      },
+      __getCountries: function(){
+        var geoCountries = document.createElement('iron-meta').byKey('geoCountries');
+        if(!geoCountries){
+          var ajax = document.createElement('iron-request');
+          var url = 'http://ws.geonames.org/countryInfo?username=elementdebase&type=JSON&lang=en';
+          
+
+          ajax.send({url: url }).then( function( ){
+            var meta = document.createElement('iron-meta');
+            meta.key = 'geoCountries';
+            meta.value = ajax.lastResponse;
+            console.log(ajax.lastResponse);
+          }.bind(this))
+          
+        }
+        this.set('countries', geoCountries)
+      },
+      ready: function(){
+        this.__getCountries();
+      }
+      
+        
+      
+
+    });
+  </script>
+</dom-module>

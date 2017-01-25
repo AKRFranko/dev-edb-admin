@@ -1,0 +1,141 @@
+<!-- shared-styles.html -->
+<dom-module id="edb-view-styles">
+  <template>
+    <style>
+      .view{
+        display:block;
+        
+        
+      }
+      .view-actions{
+        @apply(--layout-horizontal);
+        @apply(--layout-center);
+        @apply(--layout-justified);
+        width:100%;
+        box-sizing:border-box;
+        background:#111;
+        padding:10px 20px;
+        box-sizing:border-box;
+        color:#fff;
+        /*padding:0 20px;*/
+      }
+      .view-actions paper-button[raised]{
+        background:#333;
+        color:#fff;
+      }
+      .view-actions a{
+        text-decoration:none;
+      }
+      .view-actions paper-button{
+        @apply(--paper-font-caption);
+        padding-left:20px;
+        padding-right:20px;
+      }
+      .view-list,.view-editor{
+        padding:20px;
+      }
+      .search-box{
+        @apply(--layout-horizontal);
+        @apply(--layout-center);
+        
+      }
+      #searchInput{
+        padding-left:15px;
+        padding-right:15px;
+        border-radius:15px;
+        box-shadow:inset 0 0 2px rgba(0,0,0,0.25);
+        
+        border:2px solid #000;
+        height:30px;
+        outline:none;
+        transition:all .2s ease-in;
+      }
+      #searchInput:focus{
+        border:2px solid blue;
+      }
+      
+      paper-button[primary]{
+        background:#000;
+        color:#fff;
+      }
+      form.editor{
+        display:block;
+        width:100%;
+      }
+      .field{
+        box-sizing:border-box;
+        margin-right:40px;
+        margin-bottom:40px;
+        width:100%;
+      }
+      
+      
+      
+      a{
+        text-decoration:none;
+        color:inherit; 
+      }
+      .list-add{
+        margin-left:-15px;
+      }
+      
+      .actions{
+        @apply(--layout-horizontal);
+        @apply(--layout-justified);
+        padding-top:40px;
+        padding-bottom:40px;
+        margin-top:40px;
+        border-top:2px solid #000;
+        
+      }
+      .spacer{
+        @apply(--layout-flex);
+      }
+      .field .label{
+        margin-botton:10px;
+        @apply(--paper-font-caption);
+        @apply(--paper-font-body2);
+      }
+      
+      .poly{
+        @apply(--layout-horizontal);
+        @apply(--layout-center);
+      }
+      .poly > paper-input:first-of-type{
+        margin-right:1em;
+      }
+      .field.small paper-input{
+        width:100px;
+      }
+      .field.medium paper-input{
+        width:240px;
+      }
+      form.editor paper-icon-button{
+        /*color:#99f;*/
+        display:inline-block;
+        
+        color:#000;
+        
+      }
+      .list-remove{
+        color:red;
+      }
+      /*.field{*/
+      /*  display:block;*/
+      /*  @apply(--layout-horizontal);*/
+      /*  width:100%;*/
+      /*}*/
+      /*.field .label{*/
+      /*  margin-right:20px;*/
+      /*  width:100px;*/
+      /*  padding-top:10px;*/
+        /*outline:1px solid red;*/
+      /*  @apply(--paper-font-body2);*/
+      /*}*/
+      /*.field .controls{*/
+      /*  @apply(--layout-vertical);*/
+      /*}*/
+      
+    </style>
+  </template>
+</dom-module>

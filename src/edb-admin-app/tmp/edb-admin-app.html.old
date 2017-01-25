@@ -1,0 +1,344 @@
+<link rel="import" href="../../bower_components/polymer/polymer.html">
+<!--<link rel="import" href="./users/edb-user-list.html">-->
+
+<dom-module id="edb-admin-app">
+  <template>
+    <style>
+      :host {
+        display: block;
+        box-sizing:border-box;
+        font-family:sans-serif;
+        --paper-tabs-selection-bar-color:#111;
+        color:#222;
+      }
+      
+      :host *{
+        box-sizing:border-box;
+      }
+      paper-tab, ::content paper-tab{
+        position:relative;
+        @apply(--layout-center-center);
+      }
+      paper-tab a, ::content paper-tab a{
+        font:inherit
+        font-family:inherit;
+        font-size:inherit;
+        color:inherit;
+        text-decoration:none;
+        @apply(--layout-horizontal);
+        @apply(--layout-center-center);
+      }
+      
+      #mainContent{
+        @apply(--layout-vertical);
+        min-height:100%;
+        background:#f9f9f9;
+      }
+      #mainTabs{
+        margin:20px 20px 0px 20px;
+        background:#fff;
+      }
+      #mainPages{
+        margin:0px 20px 20px 20px;
+        /*background:#fff;*/
+      }
+      #mainPages ::content #tabs paper-tabs{
+        background:#999;
+        color:#fff;
+        box-sizing:border-box;
+        /*--paper-tabs-selection-bar-color:#fff;*/
+      }
+      #mainPages ::content #tabs paper-tabs .iron-selected{
+        background:#000;
+        box-sizing:border-box;
+      }
+      #mainPages ::content #pages{
+        margin-top:20px;
+        background:#fff;
+        box-sizing:border-box;
+        padding:20px;
+      }
+      
+     .menu-link.iron-selected {
+       background: #fff;
+       color:#000;
+     }
+     #mainMenu{
+       display:block;
+       width:100%;
+       @apply(--layout-vertical);
+     }
+     
+     .menu-link{
+       outline:none;
+       display:block;
+       boz-sizing:border-box;
+       padding:10px 20px;
+       text-decoration:none;
+       color:inherit;
+       @apply(--layout-horizontal);
+       -webkit-user-select: none;  /* Chrome all / Safari all */
+       -moz-user-select: none;     /* Firefox all */
+       -ms-user-select: none;      /* IE 10+ */
+       user-select: none;    
+       
+     }
+     .menu-link iron-icon{
+       margin-right:20px;
+     }
+     .menu-link .label{
+       display:inline-block;
+     }
+     app-toolbar{
+       background:#fff ;
+     }
+     app-drawer app-toolbar{
+       background-color: #111;
+       color:#fff;
+     }
+     app-drawer{
+       --app-drawer-scrim-background: rgba(0, 0, 0, 0.5);
+       --app-drawer-content-container: {
+         background-color: #111;
+         color:#fff;
+      }
+      
+     }
+     paper-tab a{
+       @apply(--layout-center-center);
+       
+     }
+     #drawerToolbar{
+       height:128px;
+     }
+     #pageTabs{
+       background:#fff;
+     }
+     #logo{
+       width:56px;
+       height:56px;
+     }
+    </style>
+    <!--<wp-rest id="wordpressConnection" name="wordpress" host="{{wpHost}}" namespace="{{wpNamespace}}" auth-key="{{authKey}}" auth-secret="{{authSecret}}" query-string="context=edit"></wp-rest>-->
+    <!--<wp-rest id="woocommerceConnection" name="woocommerce" host="{{wcHost}}" namespace="{{wcNamespace}}" auth-key="{{authKey}}" auth-secret="{{authSecret}}" query-string="context=edit"></wp-rest>-->
+    
+    <app-location id="appLocation"  use-hash-as-path route="{{mainRoute}}"></app-location>
+    <app-route route="[[mainRoute]]" pattern="/:page" data="{{mainRouteData}}" tail="{{pageRoute}}"></app-route>
+    <app-route route="[[pageRoute]]" pattern="/:tab" data="{{pageRouteData}}" tail="{{pageNestedRoute}}"></app-route>
+    
+    
+    <app-drawer-layout>
+  
+      <app-drawer>
+        <app-toolbar id="drawerToolbar">
+          <iron-icon id="logo" icon="edb-icons:logo"></iron-icon>
+        </app-toolbar>
+        <div id="mainMenu">
+          <iron-selector selected="[[mainRouteData.page]]" attr-for-selected="data-page" selectable="a" fallback-selection="home">
+            <a id="homeLink" class="menu-link" data-page="home" href="/#/home/" tabindex="-1">
+              <iron-icon icon="home" ></iron-icon>
+              <span class="label">home</span>
+            </a>
+            <a class="menu-link" data-page="users" href="/#/users/" tabindex="-1">
+              <iron-icon icon="face" ></iron-icon>
+              <span class="label">users</span>
+            </a>
+            <a class="menu-link" data-page="catalog" href="/#/catalog/" tabindex="-1">
+              <iron-icon icon="communication:import-contacts" ></iron-icon>
+              <span class="label">catalog</span>
+            </a>
+            <a class="menu-link" data-page="shipping" href="/#/shipping/" tabindex="-1">
+              <iron-icon icon="maps:local-shipping"></iron-icon>
+              <span class="label">shipping</span>
+            </a>
+          </iron-selector>
+        </div>
+      </app-drawer>
+  
+      <app-header-layout>
+  
+        <app-header id="mainHeader" fixed condenses effects="waterfall">
+          <app-toolbar id="mainToolbar">
+            <paper-icon-button icon="edb-icons:logo" drawer-toggle></paper-icon-button>
+            <div main-title>edb:/[[mainRoute.path]]</div>
+          </app-toolbar>
+
+        </app-header>
+  
+        <div id="mainContent">
+          <neon-animated-pages selected='[[mainRouteData.page]]'
+                               attr-for-selected='data-page'
+                               entry-animation='slide-from-right-animation'
+                               exit-animation='slide-left-animation'
+                               fallback-selection="home">
+            <neon-animatable data-page='home'>
+              <edb-product-editor></edb-product-editor>
+            </neon-animatable>
+            <neon-animatable data-page='users'>
+                <edb-users-page route="[[pageRoute]]"></edb-users-page>
+            </neon-animatable>
+            <neon-animatable data-page='catalog'>
+              <edb-catalog-page route="[[pageRoute]]"></edb-catalog-page>
+            </neon-animatable>
+            <neon-animatable data-page='shipping'>
+              <edb-shipping-page route="[[pageRoute]]"></edb-shipping-page>
+            </neon-animatable>
+            
+          </neon-animated-pages>
+          
+        </div>
+  
+      </app-header-layout>
+  
+    </app-drawer-layout>
+    
+    
+    
+    
+    <!--<app-header fixed condenses effects="waterfall">-->
+    <!--  <app-toolbar>-->
+    <!--    <paper-icon-button icon="menu"></paper-icon-button>-->
+    <!--    <div main-title></div>-->
+    <!--    <paper-icon-button icon="shopping-cart"></paper-icon-button>-->
+    <!--  </app-toolbar>-->
+      
+    <!--</app-header>-->
+    
+    <!--<app-route route="{{route}}" pattern="/:aspect" data="{{routeData}}" tail="subroute"></app-route>-->
+    
+    
+    
+    <!--<edb-user-form></edb-user-form>-->
+    <!-- app-location binds to the app's URL -->
+    <!--<app-location route="{{route}}" use-hash-as-path></app-location>-->
+    <!-- this app-route manages the top-level routes -->
+    <!--<app-route-->
+    <!--  route="{{route}}"-->
+    <!--  pattern="/:view"-->
+    <!--  data="{{routeData}}"-->
+    <!--  tail="{{subroute}}"></app-route>-->
+
+
+    <!--<app-header-layout fullbleed>-->
+    <!--  <app-header fixed condenses>-->
+    <!--    <app-toolbar>-->
+    <!--      <div main-title>-->
+    <!--        <a class="bloginfo" href="{{blog.homeUrl}}">-->
+    <!--          <span class="blog-name">{{blog.name}}</span>-->
+    <!--          <span class="blog-description">{{blog.description}}</span>-->
+    <!--          </a>-->
+    <!--      </div>-->
+    <!--    </app-toolbar>-->
+    <!--  </app-header>-->
+    <!--  <div id="mainContent">-->
+    <!--    <div id="mainTabs">-->
+    <!--    <paper-tabs selected="[[routeData.view]]" attr-for-selected="data-route" fallback-selection="dashboard">-->
+    <!--      <paper-tab data-route="dashboard"><a href="#/">Dashboard</a></paper-tab>-->
+    <!--      <paper-tab data-route="users"><a href="#/users/">Users</a></paper-tab>-->
+    <!--      <paper-tab data-route="products"><a href="#/products/">Products</a></paper-tab>-->
+    <!--      <paper-tab data-route="orders"><a href="#/orders/">Orders</a></paper-tab>-->
+          <!--<paper-tab data-route="orders"><a href="#/orders/">Orders</a></paper-tab>-->
+    <!--    </paper-tabs>-->
+    <!--    </div>-->
+    <!--    <div id="mainPages">-->
+    <!--    <iron-pages selected="[[routeData.view]]" attr-for-selected="id" fallback-selection="dashboard">-->
+    <!--      <div id="dashboard" route="{{subroute}}">-->
+    <!--        DASHBOARD-->
+    <!--      </div>-->
+    <!--      <edb-users-view id="users" route="{{subroute}}"></edb-users-view>-->
+    <!--      <edb-products-view id="products" route="{{subroute}}"></edb-products-view>-->
+    <!--      <edb-orders-view id="orders" route="{{subroute}}"></edb-orders-view>-->
+    <!--    </iron-pages>-->
+    <!--    </div>-->
+    <!--  </div>-->
+    <!--</app-header-layout>-->
+    
+    <!-- iron-pages selects the view based on the active route -->
+    
+    
+    
+    <!--<wp-rest-resource auto-load id="postsResource" resource="posts" last-response="{{postsResults}}" last-error="{{postsError}}" last-discovery="{{postsDiscovery}}"></wp-rest-resource>-->
+    <!--<wp-rest-document auto-load id="postDocument"  resource="posts" resource-id="{{postsResults.0.id}}" last-response="{{postResult}}" last-error="{{postError}}" last-discovery="{{postDiscovery}}"></wp-rest-document>-->
+    
+  </template>
+    
+    
+    
+    
+  <script>
+    Polymer({
+
+      is: 'edb-admin-app',
+
+      properties: {
+        
+        wpHost: {
+          type: String,
+          value: window.creds.apiHost
+        },
+        wpNamespace:{
+          type: String,
+          value: window.creds.apiNamespace
+        },
+        wooHost: {
+          type: String,
+          value: window.creds.apiHost
+        },
+        wooNamespace:{
+          type: String,
+          value: 'wc/v2'
+        },
+        authKey: {
+          type: String,
+          value: window.creds.authKey
+        },
+        authSecret: {
+          type: String,
+          value: window.creds.authSecret
+        },
+        blog: {
+          type: Object,
+          value: function(){
+            return {};
+          },
+          notify :true
+        },
+        
+        
+        
+        
+      },
+      // observers: ['__onRouteChange(mainRoute)'],
+      
+      log: function( thing ){
+        console.log('log:', thing);
+      },
+      setup: function( info ){
+        this.set('blog.name', info.name );
+        this.set('blog.description', info.description );
+        this.set('blog.homeUrl', info.home );
+        
+      },
+      teardown: function( error ){
+        console.log(error);
+      },
+      
+      ready: function(){
+        // this.$.wordpressConnection.__request('GET').then( this.setup.bind(this), this.teardown.bind(this) );
+        if(!this.route){
+          this.set('route', this.$.appLocation.route);
+        }
+        
+        this.async(function() {
+          // If the path is blank, redirect to /
+          
+          if (!this.mainRoute.path) {
+            this.$.homeLink.click();
+          }
+        }.bind(this));
+        
+      }
+
+    });
+  </script>
+</dom-module>

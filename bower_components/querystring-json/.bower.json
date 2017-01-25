@@ -1,0 +1,38 @@
+{
+  "name": "querystring-json",
+  "description": "QueryString <-> JSON converter",
+  "version": "0.3.11",
+  "main": "dest/querystring-json.js",
+  "ignore": [
+    "src",
+    "test",
+    ".vscode",
+    "node_modules",
+    ".bowerrc",
+    ".gitignore",
+    "gulpfile.js",
+    "package.json",
+    "README.md",
+    "bower_components"
+  ],
+  "homepage": "https://github.com/AKhotoolev/QSJS",
+  "authors": [
+    "A.Khotoolev <AKhotoolev@gmail.com>"
+  ],
+  "keywords": [
+    "json",
+    "url",
+    "query"
+  ],
+  "license": "MIT",
+  "_release": "0.3.11",
+  "_resolution": {
+    "type": "version",
+    "tag": "v0.3.11",
+    "commit": "49678dbb38b1a2a8bff30ffecaab385060c638cf"
+  },
+  "_source": "https://github.com/AKhotoolev/QSJS.git",
+  "_target": "^0.3.11",
+  "_originalSource": "querystring-json",
+  "_direct": true
+}

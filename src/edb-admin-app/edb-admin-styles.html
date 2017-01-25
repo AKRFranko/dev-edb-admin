@@ -1,0 +1,130 @@
+<!-- shared-styles.html -->
+<dom-module id="edb-admin-styles">
+  <template>
+    <style>
+      :host {
+        
+        font-family:sans-serif;
+        --edb-border-color: rgba(0,0,0,0.3);
+        --edb-image-placeholder-color: #ccc;
+        
+        --edb-list-header-color:#fff;
+        --edb-list-header-background:#333;
+        --edb-list-header: {
+          font-size:13px;
+          font-weight:bold;
+          text-transform:uppercase;
+          letter-spacing:0.1em;
+        };
+        
+        --edb-list-item-title: {
+          font-size:13px;
+          font-weight:bold;
+          text-transform:uppercase;
+          letter-spacing:0.1em;
+          
+        }
+
+        --edb-field-label: {
+          font-size:13px;
+          text-transform:uppercase;
+          letter-spacing:0.1em;
+        }
+        
+        
+        box-sizing:border-box;
+      }
+      :host *{
+        box-sizing:border-box;
+      }
+      
+      
+      a[tabindex="-1"]{
+        color:inherit;
+        text-decoration:none;
+      }
+      
+      
+      
+      
+       paper-tab, ::content paper-tab{
+         position:relative;
+         @apply(--layout-center-center);
+       }
+       paper-tab a, ::content paper-tab a{
+         font:inherit
+         font-family:inherit;
+         font-size:inherit;
+         color:inherit;
+         text-decoration:none;
+         @apply(--layout-horizontal);
+         @apply(--layout-center-center);
+       }
+       
+      paper-tab a{
+        @apply(--layout-center-center);
+      }
+      
+      
+      iron-image{
+        --iron-image-placeholder:{
+          background:url("data:image/png,%89PNG%0D%0A%1A%0A%00%00%00%0DIHDR%00%00%00%14%00%00%00%14%08%06%00%00%00%8D%89%1D%0D%00%00%00PIDAT8O%ED%92%B1%11%00%10%10%04%F7%B5%A0%03%9A%D0%7F%1F%94%E2%8D%40%86%97I%FE%E2%9D%0BvV%80%82%3D%05%AA%8D%A1%E2%87%27M%EE%F0%18%D0%DFl%DAC%D8%7D%86%1D%81%F0%00%27%60%F2%D7%ADC%13%04%B2%1Fn%5D%BA%C3kb%7F%B2%19s%DB%21%03%E3%13V%FE%00%00%00%00IEND%AEB%60%82");
+          background-repeat:repeat!important;
+          background-size:20px 20px!important;
+        }
+        
+      }
+      /*.metas{*/
+      
+      /*  @apply(--layout-horizontal);*/
+        /*@apply(--layout-justified);*/
+        
+      /*  width:100%;*/
+      
+      /*}*/
+        
+      .spacer{
+        @apply(--layout-flex);
+      }
+      
+      
+      
+      
+      paper-tabs{
+        font-size:11px;
+        text-transform:uppercase;
+        letter-spacing:0.1em;
+      }
+      .hugeicon{
+        display:block;
+        width:100px;
+        height:100px;
+        
+        margin:2em auto;
+      }
+      .hugetext{
+        @apply(--paper-font-headling);
+        text-align:center;
+        text-transform:uppercase;
+        margin:2em;
+      }
+      /*neon-animatable[data-mode="delete"] a{*/
+      /*  text-decoration:none;*/
+      /*}*/
+      
+      .hugebutton{
+        background:#000;
+        display:block;
+        width:100px;
+        color:#fff;
+        text-decoration:none;
+        text-align:center;
+        padding:10px 20px;
+        margin:2em auto;
+      }
+      .hugebutton.danger{
+        background:red;
+      }
+    </style>
+  </template>
+</dom-module>

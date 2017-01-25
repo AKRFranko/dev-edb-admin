@@ -1,0 +1,76 @@
+<p style="text-align: center;">demo and prototype sale<br />get up to 75% off<br />Sale ends February 20th 2017<br />Here is a selection of items available as of Tuesday January 24th</p>
+
+<p style="text-align: center;max-width:576px;margin-left:auto;margin-right:auto;">with the new year comes new collections, new launches and new displays. in order to make space at our ville st-laurent showroom and warehouse, we are having a big winter sale on all our floor models as well as prototypes and samples made over the past year. below is a selection of some discounted pieces available as of january 24th. lots more at the showroom. please note this sale is showroom only, not for sale online. first come, first served.</p>
+<style>
+.tri-image{
+ width: calc(100% + 110px);
+    margin-left: -40px;
+    margin-right: -40px;}
+.tri-image br{
+display:none;}
+.tri-image img {
+    width: calc( 100% / 3  );
+    float: left;
+    vertical-align: top;
+    display: inline-block;
+    margin: 0;
+    padding: 20px;
+}
+@media all and (max-width:780px){
+.tri-image{
+ width: calc(100% + 100px);
+    margin-left: -35px;
+    margin-right: -35px;}
+  .tri-image img {
+    width: calc( 100% / 2  );
+    float: left;
+    vertical-align: top;
+    display: inline-block;
+    margin: 0;
+    padding: 10px;
+  }
+}
+@media all and (max-width:600px){
+.tri-image{
+ width: calc(100% + 80px);
+    margin-left: -25px;
+    margin-right: -25px;}
+  .tri-image img {
+    width: calc( 100%  );
+    float: left;
+    vertical-align: top;
+    display: inline-block;
+    margin: 0;
+    padding: 0px;
+  }
+}
+</style>
+<div class="tri-image">
+  <img src="https://elementdebase-prod-elementdebase.netdna-ssl.com/wp-content/uploads/2017/01/1_slope_en.png" /><img src="https://elementdebase-prod-elementdebase.netdna-ssl.com/wp-content/uploads/2017/01/2_waffle_en.png" /><img src="https://elementdebase-prod-elementdebase.netdna-ssl.com/wp-content/uploads/2017/01/3_panorama_en.png" />
+</div>
+<div class="tri-image">
+  <img src="https://elementdebase-prod-elementdebase.netdna-ssl.com/wp-content/uploads/2017/01/4_tamtam_en.png" /><img src="https://elementdebase-prod-elementdebase.netdna-ssl.com/wp-content/uploads/2017/01/5_ping_en.png" /><img src="https://elementdebase-prod-elementdebase.netdna-ssl.com/wp-content/uploads/2017/01/6_capsule_en.png" />
+</div>
+<div class="tri-image">
+  <img src="https://elementdebase-prod-elementdebase.netdna-ssl.com/wp-content/uploads/2017/01/7_maritime_en.png" /><img src="https://elementdebase-prod-elementdebase.netdna-ssl.com/wp-content/uploads/2017/01/8_swivel_en.png" /><img src="https://elementdebase-prod-elementdebase.netdna-ssl.com/wp-content/uploads/2017/01/9_atriumsolo_en.png" />
+</div>
+<div class="tri-image">
+  <img src="https://elementdebase-prod-elementdebase.netdna-ssl.com/wp-content/uploads/2017/01/10_flex_en.png" /><img src="https://elementdebase-prod-elementdebase.netdna-ssl.com/wp-content/uploads/2017/01/11_pique_en.png" /><img src="https://elementdebase-prod-elementdebase.netdna-ssl.com/wp-content/uploads/2017/01/12_insider_en.png" />
+</div>
+
+
+<?php get_header(); ?>
+            <main id="content">
+              
+                HOME
+                <?php if( have_posts() ){
+                  while( have_posts() ){
+                    the_post();
+                    get_template_part( 'content', get_post_format() );   
+                  }
+                };
+                ?>
+                
+                
+            </main>
+<?php get_footer(); ?>

@@ -1,0 +1,128 @@
+<link rel="import" href="../../bower_components/polymer/polymer.html">
+
+<dom-module id="edb-admin-app">
+  <template>
+    <style>
+      :host {
+        display: block;
+      }
+     
+    </style>
+    <wp-rest id="wordpressConnection" name="wordpress" host="{{wpHost}}" namespace="{{wpNamespace}}" auth-key="{{authKey}}" auth-secret="{{authSecret}}"></wp-rest>
+    <wp-rest id="woocommerceConnection" name="woocommerce" host="{{wcHost}}" namespace="{{wcNamespace}}" auth-key="{{authKey}}" auth-secret="{{authSecret}}"></wp-rest>
+    
+    <!-- app-location binds to the app's URL -->
+    <app-location route="{{route}}"></app-location>
+    <!-- this app-route manages the top-level routes -->
+    <app-route
+      route="{{route}}"
+      pattern="/:view"
+      data="{{routeData}}"
+      tail="{{subroute}}"></app-route>
+
+
+    <app-header-layout fullbleed>
+      <app-header fixed condenses>
+        <app-toolbar>
+          <div main-title>
+            <a class="bloginfo" href="{{blog.homeUrl}}">
+              <span class="blog-name">{{blog.name}}</span>
+              <span class="blog-description">{{blog.description}}</span>
+              </a>
+          </div>
+        </app-toolbar>
+      </app-header>
+      <div id="mainContent">
+        <paper-tabs selected="{{currentTab}}" attr-for-selected="data-route" fallback-selection="dashboard">
+          <paper-tab data-route="dashboard"><a href="/dashboard">Dashboard</a></paper-tab>
+          <paper-tab data-route="users"><a href="/users">Users</a></paper-tab>
+          <paper-tab data-route="products"><a href="/products">products</a></paper-tab>
+          <paper-tab data-route="orders"><a href="/orders">orders</a></paper-tab>
+        </paper-tabs>
+        <iron-pages selected="[[routeData.view]]" attr-for-selected="id" fallback-selection="dashboard">
+          <div id="dashboard" route="{{subroute}}">
+            dashboard
+          </div>
+          <edb-users-view id="users" route="{{subroute}}">
+            users
+          </edb-users-view>
+          <edb-products-view id="products" route="{{subroute}}">
+            products
+          </edb-products-view>
+          <edb-orders-view id="orders" route="{{subroute}}">
+            orders
+          </edb-orders-view>
+        </iron-pages>
+      </div>
+    </app-header-layout>
+    
+    <!-- iron-pages selects the view based on the active route -->
+    
+    
+    
+    <!--<wp-rest-resource auto-load id="postsResource" resource="posts" last-response="{{postsResults}}" last-error="{{postsError}}" last-discovery="{{postsDiscovery}}"></wp-rest-resource>-->
+    <!--<wp-rest-document auto-load id="postDocument"  resource="posts" resource-id="{{postsResults.0.id}}" last-response="{{postResult}}" last-error="{{postError}}" last-discovery="{{postDiscovery}}"></wp-rest-document>-->
+    
+  </template>
+    
+    
+    
+    
+  <script>
+    Polymer({
+
+      is: 'edb-admin-app',
+
+      properties: {
+        wpHost: {
+          type: String,
+          value: window.creds.apiHost
+        },
+        wpNamespace:{
+          type: String,
+          value: window.creds.apiNamespace
+        },
+        wooHost: {
+          type: String,
+          value: window.creds.apiHost
+        },
+        wooNamespace:{
+          type: String,
+          value: 'wc/v2'
+        },
+        authKey: {
+          type: String,
+          value: window.creds.authKey
+        },
+        authSecret: {
+          type: String,
+          value: window.creds.authSecret
+        },
+        blog: {
+          type: Object,
+          value: function(){
+            return {};
+          },
+          notify :true
+        }
+        
+        
+      },
+      
+      setup: function( info ){
+        this.set('blog.name', info.name );
+        this.set('blog.description', info.description );
+        this.set('blog.homeUrl', info.home );
+        
+      },
+      teardown: function( error ){
+        console.log(error);
+      },
+      ready: function(){
+        this.$.wordpressConnection.__request('GET').then( this.setup.bind(this), this.teardown.bind(this) );
+        
+      }
+
+    });
+  </script>
+</dom-module>
