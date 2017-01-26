@@ -1,0 +1,39 @@
+<link rel="import" href="../../../bower_components/polymer/polymer.html">
+<!--<link rel="import" href="./users/edb-user-list.html">-->
+
+<dom-module id="edb-faq-fields">
+  <template>
+    <style>
+      :host {
+        display: block;
+        box-sizing:border-box;
+    
+      }
+      </style>
+      
+     <edb-field label="Question" type="dualtextarea" value="{{object.question}}"></edb-field>
+     <edb-field label="Answer" type="dualtextarea" value="{{object.answer}}"></edb-field>
+     <edb-field label="Text Color" type="color" value="{{object.textColor}}"></edb-field>
+     <edb-field label="Background Color" type="color" value="{{object.backgroundColor}}"></edb-field>
+     <edb-field label="Image" type="singleimage" value="{{object.image}}"></edb-field>
+      
+      </template>
+        
+        
+        
+        
+      <script>
+        Polymer({
+    
+          is: 'edb-faq-fields',
+          properties: {
+            object: {
+              type: Object,
+              notify: true,
+              value: null
+            }
+          }
+        });
+      </script>
+    </dom-module>
+    

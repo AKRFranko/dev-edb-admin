@@ -242,6 +242,7 @@
     <edb-material id="material" loading="{{resourceLoading}}" items="{{materials}}"  item-id="{{currentMaterialId}}" item="{{currentMaterial}}"></edb-material>
     <edb-category id="category" loading="{{resourceLoading}}" items="{{categories}}" item-id="{{currenCategoryId}}"  item="{{currentCategory}}"></edb-category>
     <edb-product  id="product"  loading="{{resourceLoading}}" items="{{products}}"   item-id="{{currenProductId}}"   item="{{currentProduct}}"></edb-product>
+    <edb-media  id="media"  loading="{{resourceLoading}}" items="{{medias}}"   item-id="{{currenMediaId}}"   item="{{currentMedia}}"></edb-media>
     
     <app-drawer-layout fullbleed>
       <app-drawer>
@@ -270,13 +271,15 @@
               <span class="label">inspiration</span></a>
             <a class="menu-link" data-mode="faq" href="/#/faq/" tabindex="-1">
             <span class="label">faq</span></a>
-            <a class="menu-link" data-mode="page" href="/#/page/" tabindex="-1">
-              <span class="label">pages</span></a>
+            <a class="menu-link" data-mode="media" href="/#/media/" tabindex="-1">
+              <span class="label">media</span></a>
             <a class="menu-link" data-mode="blog" href="/#/blog/" tabindex="-1">
               <span class="label">blog</span></a>
             <a class="menu-link" data-mode="form" href="/#/form/" tabindex="-1">
               <span class="label">forms</span></a>
-            
+            <a class="menu-link" data-mode="page" href="/#/page/" tabindex="-1">
+              <span class="label">pages</span></a>
+              
             <div class="section">Catalog</div>
             
             <a class="menu-link" data-mode="product" href="/#/product/" tabindex="-1">
@@ -375,7 +378,7 @@
           <neon-animatable data-mode='faq'>
             <edb-list-view title="FAQ" new-path="/#/edit/faq/new">
               <template is="dom-repeat" items="{{faqs}}" as="faq" sort="{{__sort('faq',searchValue)}}">
-                <edb-list-item title="{{__join(faq.title.en,faq.title.fr)}}" image="{{faq.image.src}}" edit-path="/#/edit/faq/{{faq.id}}" delete-path="/#/delete/faq/{{faq.id}}"></edb-list-item>
+                <edb-list-item title="{{__join(faq.question.en,faq.question.fr)}}" image="{{faq.image.src}}" edit-path="/#/edit/faq/{{faq.id}}" delete-path="/#/delete/faq/{{faq.id}}"></edb-list-item>
               </template>
               
             </edb-list-view>
@@ -393,12 +396,13 @@
           </neon-animatable><!-- material mode  -->
           
           <neon-animatable data-mode='category'>
-            <edb-list-view title="Categories" new-path="/#/edit/category/new" for="categories">
+            <edb-list-view title="Categories" new-path="/#/edit/category/new">
               <template is="dom-repeat" items="{{categories}}" as="category" sort="{{__sort('category',searchValue)}}">
-                <edb-list-item from="categories" title="{{__join(category.name.en,category.name.fr)}}" edit-path="/#/edit/category/{{category.id}}" delete-path="/#/delete/category/{{category.id}}">
+                <edb-list-item title="{{__join(category.name.en,category.name.fr)}}" edit-path="/#/edit/category/{{category.id}}" delete-path="/#/delete/category/{{category.id}}">
                   <div class="description">{{__join(category.description.en,category.description.fr)}}</div>
                 </edb-list-item>
               </template>
+              
               <!--<paper-spinner active$="{{!categories.length}}"></paper-spinner>-->
             </edb-list-view>
           </neon-animatable><!-- category mode  -->
@@ -406,12 +410,25 @@
           <neon-animatable data-mode='product'>
             <edb-list-view title="Products" new-path="/#/edit/product/new" for="products">
               <template is="dom-repeat" items="{{products}}" as="product" sort="{{__sort('product',searchValue)}}">
-                <edb-list-item from="products" title="{{product.name}}" image="{{product.featuredImage.src}}" edit-path="/#/edit/product/{{product.id}}" delete-path="/#/delete/product/{{product.id}}">
+                <edb-list-item title="{{product.name}}" image="{{product.featuredImage.src}}" edit-path="/#/edit/product/{{product.id}}" delete-path="/#/delete/product/{{product.id}}">
                   <div class="meta">reg: {{product.regularPrice}}</div>
                   <div class="meta">sale: {{product.salePrice}}</div>
                 </edb-list-item>
               </template>
-              <a href="/#/edit/product/new" hidden$="[[!!products.length]]">create one</a>
+              
+              <!--<paper-spinner active$="{{!products.length}}"></paper-spinner>-->
+            </edb-list-view>
+          </neon-animatable><!-- product mode  -->
+          
+          <neon-animatable data-mode='media'>
+            <edb-list-view title="Media" new-path="/#/edit/media/new">
+              <template is="dom-repeat" items="{{medias}}" as="media" sort="{{__sort('media',searchValue)}}">
+                <edb-list-item title="{{media.name}}" image="{{media.src}}" edit-path="/#/edit/media/{{media.id}}" delete-path="/#/delete/media/{{media.id}}">
+                    <granite-clipboard action="copy" text="{{media.src}}"></granite-clipboard>
+                    <div class="meta">{{media.width}} &times; {{media.height}}</div>
+                </edb-list-item>
+              </template>
+              
               <!--<paper-spinner active$="{{!products.length}}"></paper-spinner>-->
             </edb-list-view>
           </neon-animatable><!-- product mode  -->
@@ -492,7 +509,7 @@
                 <form on-submit="__submitForm">
                   <paper-icon-button class="show-code" icon="code" on-tap="__showJSONItem"></paper-icon-button>
                   <div class="title">{{__computeFormTitle('Lookbook',tailData.id)}}</div>
-                  <edb-blog-fields object="{{currentLookbook}}"></edb-blog-fields>
+                  <edb-lookbook-fields object="{{currentLookbook}}"></edb-lookbook-fields>
                   <paper-button type="submit" on-tap="__submitForm">save</paper-button>
                 </form>
               </div>
@@ -501,7 +518,7 @@
                 <form on-submit="__submitForm">
                   <paper-icon-button class="show-code" icon="code" on-tap="__showJSONItem"></paper-icon-button>
                   <div class="title">{{__computeFormTitle('Inspirations',tailData.id)}}</div>
-                  <edb-blog-fields object="{{currentInspiration}}"></edb-blog-fields>
+                  <edb-inspiration-fields object="{{currentInspiration}}"></edb-inspiration-fields>
                   <paper-button type="submit" on-tap="__submitForm">save</paper-button>
                 </form>
               </div>
@@ -510,7 +527,7 @@
                 <form on-submit="__submitForm">
                   <paper-icon-button class="show-code" icon="code" on-tap="__showJSONItem"></paper-icon-button>
                   <div class="title">{{__computeFormTitle('FAQ',tailData.id)}}</div>
-                  <edb-blog-fields object="{{currentFaq}}"></edb-blog-fields>
+                  <edb-faq-fields object="{{currentFaq}}"></edb-faq-fields>
                   <paper-button type="submit" on-tap="__submitForm">save</paper-button>
                 </form>
               </div>
@@ -541,6 +558,17 @@
                   <paper-button type="submit" on-tap="__submitForm">save</paper-button>
                 </form>
               </div>
+              
+              <div data-resource="media">
+                <form on-submit="__submitForm">
+                  <paper-icon-button class="show-code" icon="code" on-tap="__showJSONItem"></paper-icon-button>
+                  <div class="title">{{__computeFormTitle('Media',tailData.id)}}</div>
+                  <edb-media-fields object="{{currentMedia}}"></edb-media-fields>
+                  <paper-button type="submit" on-tap="__submitForm">save</paper-button>
+                </form>
+              </div>
+              
+              
               
             </iron-pages>
             
@@ -735,7 +763,9 @@
             this.__notifySuccess('Saved!');
             ref.refresh();
             if(ref.itemId == 'new'){
-              window.location.href = '/#/edit/'+resource+'/'+saved.id;
+              
+              window.location.href = '/#/'+resource+'/';  
+              
             }else{
               // window.location.href = '/#/edit/'+resource+'/'+saved.id;
               // window.location.reload()
@@ -787,7 +817,7 @@
           }.bind(this)).catch( function(e){
             this.__notifyFailure('Error! ' + e.message );;
             console.log('error!', e );
-          })
+          }.bind(this))
         }
         
         console.log('__handleDelete', item)

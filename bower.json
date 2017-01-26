@@ -22,7 +22,8 @@
     "iron-meta": "PolymerElements/iron-meta#^1.1.2",
     "paper-dropdown-menu": "PolymerElements/paper-dropdown-menu#^1.4.3",
     "paper-listbox": "PolymerElements/paper-listbox#^1.1.2",
-    "paper-item": "PolymerElements/paper-item#^1.2.1"
+    "paper-item": "PolymerElements/paper-item#^1.2.1",
+    "granite-clipboard": "LostInBrittany/granite-clipboard#^1.0.0"
   },
   "devDependencies": {
     "iron-component-page": "PolymerElements/iron-component-page#^1.0.0",

@@ -556,7 +556,40 @@
       //       }
     }
   );
-  
+ 
+ EDB.createObject( 
+   wpRest, 
+   'Inspiration', 
+   'inspirations',
+   function loadData( data ){
+     if(!data) data = {};
+     var meta_box = data.meta_box||{}; 
+     var images = meta_box.edb_inspiration_images ? meta_box.edb_inspiration_images : [];
+     images = images.map( function( i ){
+       return { id: i.ID, src: i.full_url };
+     });
+     this.id = data.id == 'new' ? null : data.id;
+     this.image = { src: data.featured_image, id:  data.featured_media };
+     this.title = splitTranslation(  data.title ? data.title.rendered  : ''  );
+     this.content = splitTranslation(  data.content ? data.content.rendered  : ''  );
+     this.images = images;
+     return this;
+   },
+   function convertData(  ){
+     console.log('convert', this.images)
+     return {
+             id: this.id,
+             featured_media: this.image.id,
+             title: joinTranslation( this.title ),
+             content:joinTranslation( this.content ),
+             meta_box: { 
+               edb_inspiration_images: this.images.map( function( i ){
+                 return  1*i.id;
+               })
+             }
+           }
+   }
+ ); 
   EDB.createObject( 
     wpRest, 
     'Faq', 
@@ -564,24 +597,29 @@
     function loadData( data ){
       if(!data) data = {};
       var meta_box = data.meta_box||{}; 
+      var question = splitTranslation( meta_box.edb_faq_question );
+      var answer = splitTranslation( meta_box.edb_faq_answer );
+      var bg = meta_box.edb_faq_background_color;
+      var fg = meta_box.edb_faq_text_color;
       this.id = data.id == 'new' ? null : data.id;
       this.image = { src: data.featured_image, id:  data.featured_media };
-      // this.title = splitTranslation(  meta_box ? data.title.rendered  : ''  );
-      // this.content = splitTranslation(  data.content ? data.content.rendered  : ''  );
-      
-      this.feature_url = data.meta_box ? data.meta_box.edb_feature_url : '';
-      
+      this.question = question;
+      this.answer = answer;
+      this.backgroundColor = bg;
+      this.textColor = fg;
       return this;
     },
     function convertData(  ){
-      // // console.log('convert feature', this );
-      // return {
-      //         id: this.id,
-      //         featured_media: this.image.id,
-      //         title: joinTranslation(this.title),
-      //         content: joinTranslation( this.content ),
-      //         meta_box: { edb_feature_url: this.edb_feature_url }
-      //       }
+      return {
+              id: this.id,
+              featured_media: this.image.id,
+              meta_box: { 
+                edb_faq_question: joinTranslation( this.question),
+                edb_faq_answer: joinTranslation( this.answer ),
+                edb_faq_background_color: this.backgroundColor,
+                edb_faq_text_color: this.textColor
+              }
+            }
     }
   );
   
@@ -726,6 +764,33 @@
                featured_media: this.image.id,
                title: joinTranslation(this.title),
                content: joinTranslation( this.content )
+             }
+    }
+  );
+  
+  EDB.createObject( 
+    wpRest, 
+    'Media', 
+    'media',
+    function loadData( data ){
+      if(!data) data = {};
+      
+      
+      this.id = data.id == 'new' ? null : data.id;
+      this.src = data.source_url;
+      this.width = data.media_details ? data.media_details.width : '--';
+      this.height = data.media_details ? data.media_details.height : '--';
+      this.name = data.title ? data.title.raw : null;
+      this.caption = data.caption && data.caption.rendered ? splitTranslation(data.caption.rendered) : null;
+      // this.title = splitTranslation(  data.title ? data.title.rendered  : ''  );
+      // this.content = splitTranslation(  data.content ? data.content.rendered  : ''  );
+      return this;
+    },
+    function convertData(  ){
+      console.log('convert media', this );
+      return {
+               id: this.id,
+               caption: joinTranslation(this.caption),
              }
     }
   );

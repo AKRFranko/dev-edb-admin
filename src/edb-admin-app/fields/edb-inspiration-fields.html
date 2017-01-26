@@ -1,0 +1,38 @@
+<link rel="import" href="../../../bower_components/polymer/polymer.html">
+<!--<link rel="import" href="./users/edb-user-list.html">-->
+
+<dom-module id="edb-inspiration-fields">
+  <template>
+    <style>
+      :host {
+        display: block;
+        box-sizing:border-box;
+    
+      }
+      </style>
+      
+     <edb-field label="Title" type="dualtext" value="{{object.title}}"></edb-field>
+     <edb-field label="Description" type="dualtextarea" value="{{object.content}}"></edb-field>
+     <edb-field label="Featured Image" type="singleimage" value="{{object.image}}"></edb-field>
+     <edb-field label="Gallery Images" type="multiimage" value="{{object.images}}"></edb-field>
+      
+      </template>
+        
+        
+        
+        
+      <script>
+        Polymer({
+    
+          is: 'edb-inspiration-fields',
+          properties: {
+            object: {
+              type: Object,
+              notify: true,
+              value: null
+            }
+          }
+        });
+      </script>
+    </dom-module>
+    

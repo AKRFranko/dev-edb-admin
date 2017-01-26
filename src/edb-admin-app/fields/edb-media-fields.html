@@ -1,0 +1,37 @@
+<link rel="import" href="../../../bower_components/polymer/polymer.html">
+<!--<link rel="import" href="./users/edb-user-list.html">-->
+
+<dom-module id="edb-media-fields">
+  <template>
+    <style>
+      :host {
+        display: block;
+        box-sizing:border-box;
+    
+      }
+      </style>
+      
+     
+     <edb-field label="Image" type="singleimage" value="{{object}}"></edb-field>
+     <edb-field label="Caption" type="dualtext" value="{{object.caption}}"></edb-field>
+      
+     </template>
+        
+        
+        
+        
+      <script>
+        Polymer({
+    
+          is: 'edb-media-fields',
+          properties: {
+            object: {
+              type: Object,
+              notify: true,
+              value: null
+            }
+          }
+        });
+      </script>
+    </dom-module>
+    
