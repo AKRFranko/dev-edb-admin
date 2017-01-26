@@ -396,7 +396,7 @@
       var anatomy_fr = data.meta_box && data.meta_box.edb_anatomy_fr ? { id: data.meta_box.edb_anatomy_fr.ID, src: data.meta_box.edb_anatomy_fr.full_url }  : null;
       this.whyWeLoveTitle=splitTranslation(wwlTitle);
       this.whyWeLoveContent=splitTranslation(wwlContent);
-      this.wireframe = wireframe;
+      this.wireframe = wireframe|| { id: null, src: null };;
       this.anatomyEn = anatomy_en || { id: null, src: null };
       this.anatomyFr = anatomy_fr|| { id: null, src: null };
       
