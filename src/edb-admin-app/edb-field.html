@@ -615,8 +615,8 @@
             this.push('value', { src: null, id: null });
             return function(){
               window.WPRestConnections.worpdress.__request('POST', '/media', { name: file.name, fileData: file} , { context: 'edit' } ).then( function( result ){
-                this.set('value.'+index+'.id', result.id );
-                this.set('value.'+index+'.src', result.source_url );
+                this.push('value', { id: result.id, src: result.source_url });
+                
               }.bind(this));
             }.bind(this)
           }).call( this, files[i], index );
