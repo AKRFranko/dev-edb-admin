@@ -610,17 +610,16 @@
         var files = event.target.files;
         var uploads = [];
         for(var i = 0; i< files.length; i++ ){
-          // var file = files[i];
-          var handler = (function(file){
+          var index = this.value.length+i;
+          var handler = (function(file, index){
+            this.push('value', { src: null, id: null });
             return function(){
               window.WPRestConnections.worpdress.__request('POST', '/media', { name: file.name, fileData: file} , { context: 'edit' } ).then( function( result ){
-                this.push('value', { src: result.source_url, id: result.id } );
-              }.bind(this)).catch(function(e){
-                Polymer.__notifyFailure( e.message )
-                console.log(e)
+                this.set('value.'+index+'.id', result.id );
+                this.set('value.'+index+'.src', result.source_url );
               }.bind(this));
             }.bind(this)
-          }).call( this, files[i]);
+          }).call( this, files[i], index );
           uploads.push(  handler );
         }
         this.set('loading', true );
@@ -630,6 +629,7 @@
           this.set('loading', false);
           return v;
         }.bind(this)).catch(function(e){
+          this.set('loading', false);
           Polymer.__notifyFailure( e.message )
           console.log(e)
         }.bind(this))
