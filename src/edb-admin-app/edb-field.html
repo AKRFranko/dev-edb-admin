@@ -610,12 +610,10 @@
         var files = event.target.files;
         var uploads = [];
         for(var i = 0; i< files.length; i++ ){
-          var index = this.value.length+i;
           var handler = (function(file, index){
-            
             return function(){
               window.WPRestConnections.worpdress.__request('POST', '/media', { name: file.name, fileData: file} , { context: 'edit' } ).then( function( result ){
-                this.push('value', { id: result.id, src: result.source_url });
+                this.push('value', { id: result.id, src: result.source_url } );
               }.bind(this));
             }.bind(this)
           }).call( this, files[i]  );
