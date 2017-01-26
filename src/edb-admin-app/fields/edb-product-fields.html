@@ -74,7 +74,7 @@
           
         </div>
         <div data-section="variations">
-          <edb-field label="Available Materials" type="select" choices="[[materials]]" compare="number" value="{{object.availableMaterials}}"></edb-field>    
+          <edb-field label="Available Materials" type="select" choices="[[materials]]" name="number" compare="number" value="{{object.availableMaterials}}"></edb-field>    
           
           <template is="dom-repeat" items="[[object.availableVariations]]" as="variation">
             <div class="variation">

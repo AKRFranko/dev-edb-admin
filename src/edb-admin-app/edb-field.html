@@ -293,7 +293,7 @@
         <template is="dom-if" if="{{__equals(type,'select')}}">
           <div class="category-select">
             <template is="dom-repeat" items="{{preparedChoices}}" as="choice">
-              <paper-checkbox on-tap="__setChoiceAsValue" checked="[[choice.checked]]">{{choice.name.en}}</paper-checkbox>
+              <paper-checkbox on-tap="__setChoiceAsValue" checked="[[choice.checked]]">{{__computeChoiceLabel(choice,index)}}</paper-checkbox>
             </template>
           </div>
         </template>
@@ -465,6 +465,7 @@
         // observer: '__log'
        }
       },
+      
       observers: [
         '__setChecked(type,value,choices)',
         '__setCountry(selectedCountry)',
@@ -487,6 +488,10 @@
         },
         __setStates: function( states ){
           this.set('states', states.detail.value );
+        },
+        __computeChoiceLabel: function( choice ){
+          if(this.name) return choice[this.name];
+          return choice.name ? choice.name.en ? choice.name.en : choice.name : 'option ' + index;
         },
       __setChecked: function( type, value, choices ){
         this.set('preparedChoices', choices );
