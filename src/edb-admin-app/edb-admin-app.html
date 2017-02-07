@@ -423,16 +423,18 @@
           </neon-animatable><!-- product mode  -->
           
           <neon-animatable data-mode='media'>
-            <edb-list-view id="mediasList" title="Media" new-path="/#/edit/media/new">
-              <template is="dom-repeat" class="repeater" items="{{medias}}" as="media" sort="{{__sort('media',searchValue)}}">
-                <edb-list-item title="{{media.name}}" image="{{media.src}}" edit-path="/#/edit/media/{{media.id}}" delete-path="/#/delete/media/{{media.id}}">
-                    <granite-clipboard action="copy" text="{{media.src}}"></granite-clipboard>
-                    <div class="meta">{{media.width}} &times; {{media.height}}</div>
-                </edb-list-item>
-              </template>
-              
-              <!--<paper-spinner active$="{{!products.length}}"></paper-spinner>-->
-            </edb-list-view>
+            <paper-dialog id="media-dialog">
+              <edb-list-view id="mediasList" title="Media" new-path="/#/edit/media/new">
+                <template is="dom-repeat" class="repeater" items="{{medias}}" as="media" sort="{{__sort('media',searchValue)}}">
+                  <edb-list-item title="{{media.name}}" image="{{media.src}}" edit-path="/#/edit/media/{{media.id}}" delete-path="/#/delete/media/{{media.id}}">
+                      <granite-clipboard action="copy" text="{{media.src}}"></granite-clipboard>
+                      <div class="meta">{{media.width}} &times; {{media.height}}</div>
+                  </edb-list-item>
+                </template>
+                
+                <!--<paper-spinner active$="{{!products.length}}"></paper-spinner>-->
+              </edb-list-view>
+            </paper-dialog>
           </neon-animatable><!-- product mode  -->
           
           <!--<neon-animatable data-mode='customer'>-->
