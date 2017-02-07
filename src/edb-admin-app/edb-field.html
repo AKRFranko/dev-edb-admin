@@ -339,7 +339,7 @@
         <template id="multiImage" is="dom-if" if="{{__equals(type,'multiimage')}}">
           <div class="image-upload">
             <div class="image-previews">
-              <template is="dom-repeat" items="{{value}}" as="image">
+              <template id="imageRepeat" is="dom-repeat" items="{{value}}" as="image">
                 <div class="image-preview">
                   <iron-image on-loaded-changed="__resizePreview" preload fade sizing="contain" src="{{image.src}}"></iron-image>
                   <paper-spinner active="{{loading}}"></paper-spinner>
@@ -470,7 +470,8 @@
       observers: [
         '__setChecked(type,value,choices)',
         '__setCountry(selectedCountry)',
-        '__setState(selectedState)'],
+        '__setState(selectedState)',
+        '__setSortables(type)'],
         __setCountry: function(selectedCountry){
           var country = this.countries.filter( function(c ){ return c.geoid ==selectedCountry})[0];
           this.set('value', country.code ) ;
@@ -644,7 +645,31 @@
           // console.log('set id and source url', result.id, result.source_url);
           this.__updateImagePreviewSize( ( result.media_details.height * 500 ) / result.media_details.width  );
         }.bind(this));
-      }
+      },
+      __setSortables: function( type ){
+        if(type == 'multiimage'){
+          this.async( function(){
+            var previews = this.querySelector('.image-previews');  
+            // var repeater = previews.querySelector('#imageRepeater');
+            var sorter = Sortable.create(previews, { draggable: '.image-preview',handle:'.image-preview', onEnd: function(evt){
+              var item = evt.item;
+              var oldIndex = evt.oldIndex;
+              var newIndex = evt.newIndex;
+              var repeater = item.parentNode.parentNode.querySelector('#imageRepeat');
+              var data = repeater.itemForElement( item );
+              this.value.splice( oldIndex, 1 );
+              this.value.splice( newIndex, 0, data );
+              console.log(this.value[0])
+              // this.notifySplice('value', 0, -1 );
+              // this.notifySplice('value', newIndex, data );
+            }.bind(this)});
+            console.log('sortable set on', previews);
+            // console.log('previews',previews)  
+          });
+          
+        }
+      },
+      
         
       
 

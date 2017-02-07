@@ -14,7 +14,11 @@
        width:100%;
        @apply(--layout-horizontal);
        min-height:80px;
-       padding:10px 20px;
+       padding:10px 20px 10px 20px;
+       position:relative;
+     }
+     #listItem[sortable]{
+       padding:10px 20px 10px 40px;
      }
      #image{
        
@@ -50,9 +54,21 @@
      #deleteButton{
        color:#e46363;
      }
+     .handle{
+       position: absolute;
+       left: 4px;
+       padding: 4px;
+       width: 30px;
+       height: 30px;
+       color: #ddd;
+       top: 50%;
+       margin-top: -22px;
+       
+     }
     </style>
    
-    <div id="listItem" class="list-item">
+    <div id="listItem" sortable$="{{sortable}}" class="list-item">
+      <paper-icon-button hidden="[[!sortable]]" class="handle" icon="reorder"></paper-icon-button>
       <div id="image" hidden$="{{!image}}" class="list-item-image">
         <iron-image preload fade sizing="contain" src="{{image}}"></iron-image>
         
@@ -79,6 +95,11 @@
       is: 'edb-list-item',
 
       properties: {
+        sortable: { type: Boolean,
+                    value:false,
+                    notify: true,
+          reflectToAttribute: true
+        },
        title: {
          type: String,
          notify: true

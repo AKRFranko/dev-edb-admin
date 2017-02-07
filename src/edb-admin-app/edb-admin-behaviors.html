@@ -67,10 +67,38 @@
       K.list = function(){
         return api.__request('GET', path,  null, { context: 'edit'} ).then( function( items ){
           console.log(items, name)
-          return items.map( function( data ){
+          var items =  items.map( function( data ){
             var instance = new K( data );
             return instance;
           });
+          if(items[0] && ( items[0].sortOrder || items[0].sortOrder === 0)){
+            items = items.sort( function( a, b ){
+              return a.sortOrder < b.sortOrder ? -1 : 1;
+            });
+          }
+          return items
+        });
+      };
+      K.update = function( items ){
+        var objects = items.map( function( i ){ return i.toJSON() });
+        var first = objects.shift();
+        var initial = api.__request('PUT', path + '/' +first.id, first , {context: 'edit'} );
+        var responses = [];
+        var final   =  objects.reduce( function( previousPromise, nextObject ){ 
+          return previousPromise.then( function( response ){
+            responses.push( new K( response ) );
+            var next = objects.shift();
+            return api.__request('PUT', path + '/' + next.id ,next , {context: 'edit'} );
+          } )
+        }, initial );
+        return final.then( function( response ){ 
+          responses.push( new K( response ) );
+          if(response.sortOrder || response.sortOrder === 0){
+            responses = responses.sort( function( a, b ){
+              return a.sortOrder < b.sortOrder ? -1 : 1;
+            });
+          }
+          return responses;
         });
       };
       K.get = function( id ){
@@ -80,6 +108,7 @@
             return new K( data );
         });
       };
+      
       K.prototype = {
         create: function(  ){
           var reload = this.loadData.bind(this);
@@ -223,6 +252,19 @@
              }.bind( this )).catch( this.__notifyFailure.bind(this) );;
           }else{
              this.fire('refresh');
+             return Promise.resolve();
+          }
+        },
+        updateList: function(){
+          if( this.ref ){
+            // var items = this.items.map( function( i ){ return i.toJSON() });
+            console.log('items', this.items );
+            this.set('loading', true );
+             return this.ref.update( this.items ).then( function( list ){
+               this.set('items', list );
+               this.set('loading', false );
+             }.bind( this )).catch( this.__notifyFailure.bind(this) );;
+          }else{
              return Promise.resolve();
           }
         }
@@ -486,7 +528,7 @@
       this.title = splitTranslation(data.title ? data.title.rendered : '');
       this.subtitle = splitTranslation( data.content ? data.content.rendered  : '');
       this.slide_url = data.meta_box ? data.meta_box.edb_slide_url : '';
-      
+      this.sortOrder = data.meta_box ? data.meta_box.edb_sort_order : null;
       return this;
     },
     function convertData(  ){
@@ -496,7 +538,7 @@
                featured_media: this.image.id,
                title: joinTranslation(this.title),
                content: joinTranslation( this.subtitle ),
-               meta_box: { edb_slide_url: this.slide_url }
+               meta_box: { edb_slide_url: this.slide_url, edb_sort_order: this.sortOrder }
              }
     }
   );
@@ -511,8 +553,9 @@
       this.id = data.id == 'new' ? null : data.id;
       this.image = { src: data.featured_image, id:  data.featured_media };
       this.title = splitTranslation(  data.title ? data.title.rendered  : ''  );
+      this.subtitle = splitTranslation(  data.excerpt ? data.excerpt.rendered  : ''  );
       this.content = splitTranslation(  data.content ? data.content.rendered  : ''  );
-      
+      this.sortOrder = data.meta_box ? data.meta_box.edb_sort_order : null;
       this.feature_url = data.meta_box ? data.meta_box.edb_feature_url : '';
       
       return this;
@@ -524,7 +567,7 @@
                featured_media: this.image.id,
                title: joinTranslation(this.title),
                content: joinTranslation( this.content ),
-               meta_box: { edb_feature_url: this.edb_feature_url }
+               meta_box: { edb_feature_url: this.edb_feature_url , edb_sort_order: this.sortOrder}
              }
     }
   );
@@ -572,6 +615,7 @@
      this.image = { src: data.featured_image, id:  data.featured_media };
      this.title = splitTranslation(  data.title ? data.title.rendered  : ''  );
      this.content = splitTranslation(  data.content ? data.content.rendered  : ''  );
+     this.sortOrder = data.meta_box ? data.meta_box.edb_sort_order : null;
      this.images = images;
      return this;
    },
@@ -585,7 +629,8 @@
              meta_box: { 
                edb_inspiration_images: this.images.map( function( i ){
                  return  1*i.id;
-               })
+               }),
+               edb_sort_order: this.sortOrder
              }
            }
    }
@@ -607,6 +652,7 @@
       this.answer = answer;
       this.backgroundColor = bg;
       this.textColor = fg;
+      this.sortOrder = data.meta_box ? data.meta_box.edb_sort_order : null;
       return this;
     },
     function convertData(  ){
@@ -617,7 +663,8 @@
                 edb_faq_question: joinTranslation( this.question),
                 edb_faq_answer: joinTranslation( this.answer ),
                 edb_faq_background_color: this.backgroundColor,
-                edb_faq_text_color: this.textColor
+                edb_faq_text_color: this.textColor,
+                edb_sort_order: this.sortOrder
               }
             }
     }

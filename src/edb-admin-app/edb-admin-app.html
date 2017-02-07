@@ -210,7 +210,9 @@
         height:80%;
         overflow:auto;
       }
-    
+      edb-list-item.sortable-ghost{
+        background:#fff;
+      }
     
     </style>
     
@@ -311,8 +313,8 @@
           
           <neon-animatable data-mode='user'>
             
-            <edb-list-view title="Users" new-path="/#/edit/user/new" sort="{{__sort('user',searchValue)}}">
-              <template is="dom-repeat" items="{{users}}" as="user">
+            <edb-list-view id="usersList" title="Users" new-path="/#/edit/user/new" sort="{{__sort('user',searchValue)}}">
+              <template c items="{{users}}" as="user">
                 <edb-list-item title="{{user.name}}" image="{{user.image.src}}" edit-path="/#/edit/user/{{user.id}}" delete-path="/#/delete/user/{{user.id}}">
                   <p>{{user.email}}</p>
                 </edb-list-item>
@@ -322,9 +324,9 @@
           </neon-animatable><!-- user mode  -->
           
           <neon-animatable data-mode='slide'>
-            <edb-list-view title="Slides" new-path="/#/edit/slide/new" for="slides">
-              <template is="dom-repeat" items="{{slides}}" as="slide" sort="{{__sort('slide',searchValue)}}">
-                <edb-list-item title="{{__join(slide.title.en,slide.title.fr)}}" image="{{slide.image.src}}" edit-path="/#/edit/slide/{{slide.id}}" delete-path="/#/delete/slide/{{slide.id}}">
+            <edb-list-view id="slidesList" title="Slides" new-path="/#/edit/slide/new" for="slides">
+              <template is="dom-repeat" class="repeater" items="{{slides}}" as="slide">
+                <edb-list-item sortable title="{{__join(slide.title.en,slide.title.fr)}}" image="{{slide.image.src}}" edit-path="/#/edit/slide/{{slide.id}}" delete-path="/#/delete/slide/{{slide.id}}">
                   <div class="subtitle">{{__join(slide.subtitle.en,slide.subtitle.fr)}}</div>
                   <div class="url">{{slide.slide_url}}</div>
                 </edb-list-item>
@@ -333,9 +335,9 @@
           </neon-animatable><!-- slide mode  -->
           
           <neon-animatable data-mode='feature'>
-            <edb-list-view title="Feature Posts" new-path="/#/edit/feature/new">
-              <template is="dom-repeat" items="{{features}}" as="feature" sort="{{__sort('feature',searchValue)}}">
-                <edb-list-item title="{{__join(feature.title.en,feature.title.fr)}}" image="{{feature.image.src}}" edit-path="/#/edit/feature/{{feature.id}}" delete-path="/#/delete/feature/{{feature.id}}">
+            <edb-list-view id="featuresList" title="Feature Posts" new-path="/#/edit/feature/new">
+              <template is="dom-repeat" class="repeater" items="{{features}}" as="feature">
+                <edb-list-item sortable title="{{__join(feature.title.en,feature.title.fr)}}" image="{{feature.image.src}}" edit-path="/#/edit/feature/{{feature.id}}" delete-path="/#/delete/feature/{{feature.id}}">
                   <div class="url">{{feature.feature_url}}</div>
                 </edb-list-item>
               </template>
@@ -343,24 +345,24 @@
           </neon-animatable><!-- feature mode  -->
           
           <neon-animatable data-mode='page'>
-            <edb-list-view title="Pages" new-path="/#/edit/page/new">
-              <template is="dom-repeat" items="{{pages}}" as="page" sort="{{__sort('page',searchValue)}}">
+            <edb-list-view id="pagesList" title="Pages" new-path="/#/edit/page/new">
+              <template is="dom-repeat" class="repeater" items="{{pages}}" as="page" sort="{{__sort('page',searchValue)}}">
                 <edb-list-item title="{{__join(page.title.en,page.title.fr)}}" image="{{page.image.src}}" edit-path="/#/edit/page/{{page.id}}" delete-path="/#/delete/page/{{page.id}}"></edb-list-item>
               </template>
             </edb-list-view>
           </neon-animatable><!-- page mode  -->
           
           <neon-animatable data-mode='blog'>
-            <edb-list-view title="Blog Posts" new-path="/#/edit/blog/new">
-              <template is="dom-repeat" items="{{blogs}}" as="blog" sort="{{__sort('blog',searchValue)}}">
+            <edb-list-view id="blogsList" title="Blog Posts" new-path="/#/edit/blog/new">
+              <template is="dom-repeat" class="repeater" items="{{blogs}}" as="blog" sort="{{__sort('blog',searchValue)}}">
                 <edb-list-item title="{{__join(blog.title.en,blog.title.fr)}}" image="{{blog.image.src}}" edit-path="/#/edit/blog/{{blog.id}}" delete-path="/#/delete/blog/{{blog.id}}"></edb-list-item>
               </template>
             </edb-list-view>
           </neon-animatable><!-- blog mode  -->
           
           <neon-animatable data-mode='lookbook'>
-            <edb-list-view title="Lookbooks" new-path="/#/edit/lookbook/new">
-              <template is="dom-repeat" items="{{lookbooks}}" as="lookbook" sort="{{__sort('lookbook',searchValue)}}">
+            <edb-list-view id="lookbooksList" title="Lookbooks" new-path="/#/edit/lookbook/new">
+              <template is="dom-repeat" class="repeater" items="{{lookbooks}}" as="lookbook" sort="{{__sort('lookbook',searchValue)}}">
                 <edb-list-item title="{{__join(lookbook.title.en,lookbook.title.fr)}}" image="{{lookbook.image.src}}" edit-path="/#/edit/lookbook/{{lookbook.id}}" delete-path="/#/delete/lookbook/{{lookbook.id}}"></edb-list-item>
               </template>
               
@@ -368,25 +370,25 @@
           </neon-animatable><!-- lookbook mode  -->
           
           <neon-animatable data-mode='inspiration'>
-            <edb-list-view title="Inspirations" new-path="/#/edit/inspiration/new">
-              <template is="dom-repeat" items="{{inspirations}}" as="inspiration" sort="{{__sort('inspiration',searchValue)}}">
-                <edb-list-item title="{{__join(inspiration.title.en,inspiration.title.fr)}}" image="{{inspiration.image.src}}" edit-path="/#/edit/inspiration/{{inspiration.id}}" delete-path="/#/delete/inspiration/{{inspiration.id}}"></edb-list-item>
+            <edb-list-view id="inspirationsList" title="Inspirations" new-path="/#/edit/inspiration/new">
+              <template is="dom-repeat" class="repeater" items="{{inspirations}}" as="inspiration" sort="{{__sort('inspiration',searchValue)}}">
+                <edb-list-item sortable title="{{__join(inspiration.title.en,inspiration.title.fr)}}" image="{{inspiration.image.src}}" edit-path="/#/edit/inspiration/{{inspiration.id}}" delete-path="/#/delete/inspiration/{{inspiration.id}}"></edb-list-item>
               </template>
             </edb-list-view>
           </neon-animatable><!-- inspiration mode  -->
           
           <neon-animatable data-mode='faq'>
-            <edb-list-view title="FAQ" new-path="/#/edit/faq/new">
-              <template is="dom-repeat" items="{{faqs}}" as="faq" sort="{{__sort('faq',searchValue)}}">
-                <edb-list-item title="{{__join(faq.question.en,faq.question.fr)}}" image="{{faq.image.src}}" edit-path="/#/edit/faq/{{faq.id}}" delete-path="/#/delete/faq/{{faq.id}}"></edb-list-item>
+            <edb-list-view id="faqsList" title="FAQ" new-path="/#/edit/faq/new">
+              <template is="dom-repeat" class="repeater" items="{{faqs}}" as="faq" sort="{{__sort('faq',searchValue)}}">
+                <edb-list-item sortable title="{{__join(faq.question.en,faq.question.fr)}}" image="{{faq.image.src}}" edit-path="/#/edit/faq/{{faq.id}}" delete-path="/#/delete/faq/{{faq.id}}"></edb-list-item>
               </template>
               
             </edb-list-view>
           </neon-animatable><!-- faq mode  -->
           
           <neon-animatable data-mode='material'>
-            <edb-list-view title="Materials" new-path="/#/edit/material/new">
-              <template is="dom-repeat" items="{{materials}}" as="material" sort="{{__sort('material',searchValue)}}">
+            <edb-list-view id="materialsList" title="Materials" new-path="/#/edit/material/new">
+              <template is="dom-repeat" class="repeater" items="{{materials}}" as="material" sort="{{__sort('material',searchValue)}}">
                 <edb-list-item from="materials" title="{{material.number}}" image="{{material.image.src}}" edit-path="/#/edit/material/{{material.id}}" delete-path="/#/delete/material/{{material.id}}">
                   <div class="name">{{__join(material.name.en,material.name.fr)}}</div>
                 </edb-list-item>
@@ -396,8 +398,8 @@
           </neon-animatable><!-- material mode  -->
           
           <neon-animatable data-mode='category'>
-            <edb-list-view title="Categories" new-path="/#/edit/category/new">
-              <template is="dom-repeat" items="{{categories}}" as="category" sort="{{__sort('category',searchValue)}}">
+            <edb-list-view id="categoriesList" title="Categories" new-path="/#/edit/category/new">
+              <template is="dom-repeat" class="repeater" items="{{categories}}" as="category" sort="{{__sort('category',searchValue)}}">
                 <edb-list-item title="{{__join(category.name.en,category.name.fr)}}" edit-path="/#/edit/category/{{category.id}}" delete-path="/#/delete/category/{{category.id}}">
                   <div class="description">{{__join(category.description.en,category.description.fr)}}</div>
                 </edb-list-item>
@@ -408,8 +410,8 @@
           </neon-animatable><!-- category mode  -->
           
           <neon-animatable data-mode='product'>
-            <edb-list-view title="Products" new-path="/#/edit/product/new" for="products">
-              <template is="dom-repeat" items="{{products}}" as="product" sort="{{__sort('product',searchValue)}}">
+            <edb-list-view id="productsList" title="Products" new-path="/#/edit/product/new" for="products">
+              <template is="dom-repeat" class="repeater" items="{{products}}" as="product" sort="{{__sort('product',searchValue)}}">
                 <edb-list-item title="{{product.name}}" image="{{product.featuredImage.src}}" edit-path="/#/edit/product/{{product.id}}" delete-path="/#/delete/product/{{product.id}}">
                   <div class="meta">reg: {{product.regularPrice}}</div>
                   <div class="meta">sale: {{product.salePrice}}</div>
@@ -421,8 +423,8 @@
           </neon-animatable><!-- product mode  -->
           
           <neon-animatable data-mode='media'>
-            <edb-list-view title="Media" new-path="/#/edit/media/new">
-              <template is="dom-repeat" items="{{medias}}" as="media" sort="{{__sort('media',searchValue)}}">
+            <edb-list-view id="mediasList" title="Media" new-path="/#/edit/media/new">
+              <template is="dom-repeat" class="repeater" items="{{medias}}" as="media" sort="{{__sort('media',searchValue)}}">
                 <edb-list-item title="{{media.name}}" image="{{media.src}}" edit-path="/#/edit/media/{{media.id}}" delete-path="/#/delete/media/{{media.id}}">
                     <granite-clipboard action="copy" text="{{media.src}}"></granite-clipboard>
                     <div class="meta">{{media.width}} &times; {{media.height}}</div>
@@ -436,7 +438,7 @@
           <!--<neon-animatable data-mode='customer'>-->
           <!--  <edb-customer id="customer" items="{{customers}}" itemId="{{currentCustomerId}}" item="{{currentCustomer}}"></edb-customer>-->
           <!--  <edb-list-view title="Customers" new-path="/#/edit/customer/new" for="customers">-->
-          <!--    <template is="dom-repeat" items="{{customers}}" as="customer">-->
+          <!--    <template is="dom-repeat" class="repeater items="{{customers}}" as="customer">-->
           <!--      <edb-list-item from="products" title="{{customer.name}}" image="{{customer.images.0.src}}" edit-path="/#/edit/customer/{{customer.id}}" delete-path="/#/delete/customer/{{customer.id}}"></edb-list-item>-->
           <!--    </template>-->
           <!--    <paper-spinner active$="{{!customers.length}}"></paper-spinner>-->
@@ -705,9 +707,7 @@
         console.log(error);
       },
       __handleRefresh: function( event ){
-        var parent = Polymer.dom(event).rootTarget.parentNode;
-        var resource = parent.getAttribute('data-mode');
-        
+        var resource = this.__resourceForElement(Polymer.dom(event).rootTarget);
         this.$[resource].refresh().then( function(){
           this.__notifySuccess('Refreshed!');
         }.bind(this))
@@ -737,7 +737,7 @@
       },
       
       __showJSONItem: function(e){
-        var resource = Polymer.dom(e).localTarget.parentNode.parentNode.getAttribute('data-resource');
+        var resource = this.__resourceForElement(Polymer.dom(event).localTarget);
         var data = this.$[resource].item.data;
         var contents =  JSON.stringify( data, null, 2 );
         this.$.jsonBox.innerHTML = contents;
@@ -753,9 +753,9 @@
         
       },
       __submitForm: function( event ){
-        var root = Polymer.dom(event).rootTarget;
-        var parent = root.parentNode.parentNode;
-        var resource = parent.getAttribute('data-resource');
+        // var root = ;
+        // var parent = root.parentNode.parentNode;
+        var resource = this.__resourceForElement(Polymer.dom(event).rootTarget);//parent.getAttribute('data-resource');
         var ref = this.$[resource];
         if(ref){
           
@@ -822,14 +822,73 @@
         
         console.log('__handleDelete', item)
       },
-      
-      ready: function(){
-      
-        if(!this.route){
-          this.set('route', this.$.appLocation.route);
+      __refForResource: function( resource ){
+        return this.$[resource];
+      },
+      __resourceForElement: function( element, lvl ){
+        var dataRes = element.getAttribute('data-resource');
+        var dataMod = element.getAttribute('data-mode');
+        lvl = lvl || 0;
+        if( lvl > 3) return null;
+        if(!dataRes && !dataMod){
+          return this.__resourceForElement( element.parentNode, lvl+1 );
+        }else{
+          return dataRes||dataMod;
         }
         
         
+      },
+      __createSortable: function( container ){
+        // console.log('creating soratable', container )
+        container.sortable=true;
+        var repeater = container.querySelector('template.repeater');
+        var el = container.querySelector('#items').querySelector('#contentWrapper');
+        var sort = Sortable.create(el, {
+          animation: 0, // ms, animation speed moving items when sorting, `0` — without animation
+          handle: "edb-list-item", // Restricts sort start click/touch to the specified element
+          draggable: "edb-list-item", // Specifies which items inside the element should be sortable
+          onEnd: function (evt/**Event*/){
+            var item = evt.item; // the current dragged HTMLElement
+            var data = repeater.itemForElement( item );
+            var oldIndex = evt.oldIndex;
+            var newIndex = evt.newIndex;
+            data.sortOrder = newIndex;
+            container.needsUpdate = true;
+            console.log('sorted', item, newIndex, oldIndex);
+          }.bind(this)
+        });    
+      },
+      createNotifier: function( type, message ){
+        var it = this;
+        return function(){
+          if(type == 'success'){
+            it.__notifySuccess( message );
+            return message;
+          }else{
+            it.__notifyFailure( message );
+            return message;
+          }
+        }.bind(it);
+      },
+      ready: function(){
+      
+      
+        var listViews = Array.prototype.slice.call(document.querySelectorAll('edb-list-view'));
+        listViews.forEach( function( lv ){
+          lv.addEventListener( 'update-items', function( event ){
+            var view = Polymer.dom(event).localTarget;
+            var resource = this.__resourceForElement( view );
+            var success = this.createNotifier('success', 'Updated!');
+            var failure = this.createNotifier('failure', 'Sorry, something messed up!');
+            this.$[resource].updateList( ).then( success ).catch( failure );
+            lv.needsUpdate = false;
+          }.bind(this));
+        }, this );
+        
+        if(!this.route){
+          this.set('route', this.$.appLocation.route);
+        }
+
         this.async(function() {
           // If the path is blank, redirect to /
           if (!this.mainRoute.path) {
@@ -847,9 +906,15 @@
       // this.$.product.refresh();
       this.$.category.refresh();
       // this.$.slide.refresh();
+      this.__createSortable( this.$.slidesList );
+      this.__createSortable( this.$.featuresList );
+      this.__createSortable( this.$.inspirationsList );
+      this.__createSortable( this.$.faqsList );
       
         Polymer.__notifyFailure = this.__notifyFailure.bind(this);
       }
+      
+      
 
     });
   </script>

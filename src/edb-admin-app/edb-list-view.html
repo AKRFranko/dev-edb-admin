@@ -119,6 +119,9 @@
         
         <div id="title" class="list-title">{{title}}</div>
         <div class="spacer"></div>
+        <template is="dom-if" if="{{sortable}}">
+          <paper-button hidden="{{!needsUpdate}}" on-tap="__fireUpdate">udpate</paper-button>
+        </template>
         <a href="{{newPath}}" tabindex="-1"><paper-button id="new">new</paper-button></a>
         <paper-icon-button icon="autorenew" on-tap="__fireRefresh"></paper-icon-button>
       </div>
@@ -147,6 +150,16 @@
          type: String,
          notify: true
        },
+       sortable: {
+         type: Boolean,
+         notify: true,
+         value: false
+       },
+       needsUpdate: {
+         type: Boolean,
+         notify: true,
+         value: false
+       },
        newPath:{
          type: String,
          notify: true,
@@ -155,6 +168,9 @@
       },
       __fireRefresh: function(){
         this.fire('refresh');
+      },
+      __fireUpdate: function(){
+        this.fire('update-items');
       }
       
         
