@@ -213,6 +213,83 @@
       edb-list-item.sortable-ghost{
         background:#fff;
       }
+      paper-dialog{
+        width:100%;
+        height:100%;
+      }
+      #mediaDialog paper-dialog-scrollable{
+        @apply(--layout-flex);
+        
+        @apply(--layout-horizontal);
+      }
+      #mediaDialog .selected-media-item{
+        @apply(--layout-vertical);
+        
+        display:block;
+        box-sizing:border-box;
+        width:30%;
+        padding:5px;
+        background:rgba(0,0,0,0.5);
+      }
+      #mediaDialog .media-items{
+        @apply(--layout-horizontal);
+        @apply(--layout-wrap);
+        display:block;
+        box-sizing:border-box;
+        width:70%;
+        padding:5px;
+        
+        background:rgba(0,0,0,0.05);
+      }
+      #mediaDialog .media-items .media-item{
+        box-sizing:border-box;
+        display:inline-block;
+        width:calc(100% / 4 - 12px);
+        height:0;
+        border:1px solid rgba(0,0,0,0.01);
+        
+        box-shadow:1px 1px 3px rgba(0,0,0,0.1);
+        padding-top:calc(100% / 4 - 12px);
+        position:relative;
+      }
+      #mediaDialog .media-items .media-preview{
+        box-sizing:border-box;
+        position:absolute;
+        width:100%;
+        height:100%;
+        top:0;
+        right:0;
+        bottom:0;
+        left:0;
+        /*background:url("data:image/png,%89PNG%0D%0A%1A%0A%00%00%00%0DIHDR%00%00%00%14%00%00%00%14%08%06%00%00%00%8D%89%1D%0D%00%00%00PIDAT8O%ED%92%B1%11%00%10%10%04%F7%B5%A0%03%9A%D0%7F%1F%94%E2%8D%40%86%97I%FE%E2%9D%0BvV%80%82%3D%05%AA%8D%A1%E2%87%27M%EE%F0%18%D0%DFl%DAC%D8%7D%86%1D%81%F0%00%27%60%F2%D7%ADC%13%04%B2%1Fn%5D%BA%C3kb%7F%B2%19s%DB%21%03%E3%13V%FE%00%00%00%00IEND%AEB%60%82");*/
+        /*background-repeat:repeat!important;*/
+        /*background-size:20px 20px!important;*/
+        /*--iron-image-placeholder:{*/
+        /* background:none;*/
+        /*}*/
+      }
+      #mediaDialog .media-items .media-meta{
+        position:absolute;
+        top:100%;
+        height:40px;
+        margin-top:-40px;
+        background:rgba(0,0,0,0.5);
+        color:#fff;
+        @apply(--paper-font-caption);
+        text-align:center;
+        width:100%;
+        white-space:nowrap;
+        
+      }
+      .selected-media-item{
+         text-align:center;
+      }
+      .selected-media-item iron-image{
+        
+        width:100%;
+        height:50%;
+      }
+      
     
     </style>
     
@@ -423,18 +500,7 @@
           </neon-animatable><!-- product mode  -->
           
           <neon-animatable data-mode='media'>
-            <paper-dialog id="media-dialog">
-              <edb-list-view id="mediasList" title="Media" new-path="/#/edit/media/new">
-                <template is="dom-repeat" class="repeater" items="{{medias}}" as="media" sort="{{__sort('media',searchValue)}}">
-                  <edb-list-item title="{{media.name}}" image="{{media.src}}" edit-path="/#/edit/media/{{media.id}}" delete-path="/#/delete/media/{{media.id}}">
-                      <granite-clipboard action="copy" text="{{media.src}}"></granite-clipboard>
-                      <div class="meta">{{media.width}} &times; {{media.height}}</div>
-                  </edb-list-item>
-                </template>
-                
-                <!--<paper-spinner active$="{{!products.length}}"></paper-spinner>-->
-              </edb-list-view>
-            </paper-dialog>
+           <paper-button on-tap="openMediaDialog" class="hugebutton">Open Media Dialog</paper-button>
           </neon-animatable><!-- product mode  -->
           
           <!--<neon-animatable data-mode='customer'>-->
@@ -591,7 +657,35 @@
         <paper-dialog id="codeBox">
             <pre id="jsonBox"></pre>
         </paper-dialog>
-        
+        <paper-dialog id="mediaDialog" modal>
+          <h2>Media Files</h2>
+          <paper-dialog-scrollable>
+            <div class="media-items">
+              <iron-selector selected="{{selectedMediaId}}" attr-for-selected="data-media-id" fallback-selection="{{__getFirstItemId(medias)}}">
+              
+            <template id="mediaRepeater" is="dom-repeat" class="repeater" items="{{medias}}" as="media" sort="{{__sort('media',searchValue)}}">
+              <div class="media-item" data-media-id="{{media.id}}">
+                <iron-image class="media-preview" sizing="cover" preload fade src="{{media.src}}"></iron-image>
+                <div class="media-meta">
+                  <div class="name">{{media.name}}</div>
+                  <div class="size">{{media.width}} &times; {{media.height}}</div>
+                  <!--<granite-clipboard action="copy" text="{{media.src}}"></granite-clipboard>-->
+                </div>
+              </div>
+            </template>
+            </iron-selector>
+            </div>
+            <div class="selected-media-item">
+              <h1>{{selectedMedia.name}}</h1>
+              <iron-image preload sizing="contain" fade src="{{selectedMedia.src}}"></iron-image>
+              <div class="media-meta">
+                <div class="size">{{selectedMedia.width}} &times; {{selectedMedia.height}}</div>
+                <granite-clipboard action="copy" text="{{media.src}}"></granite-clipboard>
+              </div>
+            </div>
+          </paper-dialog-scrollable>
+          
+        </paper-dialog>
       
   </template>
   <script>
@@ -642,7 +736,22 @@
         
       },
       
-      observers: ['__onRouteChange(mainRoute)'],
+      observers: ['__onRouteChange(mainRoute)','__selectedMediaIdChanged(selectedMediaId)'],
+      __selectedMediaIdChanged: function( id ){
+        // var el = document.querySelector('[data-media-id="'+id+'"]');
+        // var data = .itemForElement(el);
+        
+        
+        var selectedItem = this.$.mediaRepeater.items.reduce( function( found, next ){
+          if( found ) return found;
+          if( next.id == id ) return next;
+          return found;
+        }, false );
+        this.set('selectedMedia', selectedItem );
+        
+        console.log( 'selectedMedia', selectedItem  );
+        
+      },
       __selectedCountryChanged: function(event){
         var ajax = document.createElement('iron-request');
         console.log('selectedCountry',event.detail.value)
@@ -655,6 +764,14 @@
           }.bind(this))  
         }
 
+      },
+      openMediaDialog: function(){
+        this.$.mediaDialog.open();
+      },
+      __getFirstItemId: function( items ){
+        if(!items) return null;
+        if(!items[0]) return null;
+        return items[0].id;
       },
       // __computeGeoStateParams: function( selectedCountry ){
       //   if(selectedCountry){
@@ -724,6 +841,7 @@
           }else if(this.routeData.mode == 'edit' || this.routeData.mode == 'delete' ){
             this.$[this.tailData.resource].itemId = this.tailData.id;
           }
+          
         }
         if(!this.get('lastRoute')){
           this.set('lastRoute', route );  
