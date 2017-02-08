@@ -65,7 +65,7 @@
         return instance;
       };
       K.list = function(){
-        return api.__request('GET', path,  null, { context: 'edit'} ).then( function( items ){
+        return api.__request('GET', path,  null, { per_page 100, context: 'edit'} ).then( function( items ){
           console.log(items, name)
           var items =  items.map( function( data ){
             var instance = new K( data );
