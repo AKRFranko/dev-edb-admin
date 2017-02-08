@@ -158,7 +158,7 @@
         },
         toJSON: function(){
           var json = toJSON.call( this );
-          console.log('toJSON', json)
+          console.log('toJSON', JSON.stringify(json))
           return json;
         }
       };
@@ -258,7 +258,7 @@
         updateList: function(){
           if( this.ref ){
             // var items = this.items.map( function( i ){ return i.toJSON() });
-            console.log('items', this.items );
+            console.log('items', this.items.length );
             this.set('loading', true );
              return this.ref.update( this.items ).then( function( list ){
                this.set('items', list );
@@ -381,7 +381,7 @@
   }
   var loadVariation = function( data ){
    var image = data.image && data.image[0] ? data.image[0] : {src: null, id: null };
-   console.log('loadVariation', image )
+  // console.log('loadVariation', image )
    var materialNumber = data.attributes && data.attributes[0] ? data.attributes[0].option : null;
    var variation = { image: image, materialNumber: materialNumber, material: null };
    if(data.id) variation.id = data.id;

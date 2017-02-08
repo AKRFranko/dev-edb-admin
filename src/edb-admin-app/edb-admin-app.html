@@ -214,32 +214,66 @@
         background:#fff;
       }
       paper-dialog{
-        width:100%;
-        height:100%;
+        width:90%;
+        height:90%;
+      }
+      #mediaDialog {
+        /*width:100%;*/
+        /*height:100%;*/
       }
       #mediaDialog paper-dialog-scrollable{
-        @apply(--layout-flex);
-        
-        @apply(--layout-horizontal);
+        /*width:100%;*/
+        /*height:100%;*/
+        /*background:Red;*/
+        /*float:left;*/
+        /*width:100%;*/
+        height:calc(100% - 160px);
+        overflow:auto;
+        /*height:calc(100% - 200px);*/
       }
-      #mediaDialog .selected-media-item{
-        @apply(--layout-vertical);
-        
+      paper-dialog-scrollable ::content #scrollable{
+        padding:0;
+      }
+      #mediaDialog .scrollable-content{
+        /*@apply(--layout-flex);*/
         display:block;
+        float:left;
+        width:100%;
+        height:100%;
+        /*min-height:100%;*/
+        /*@apply(--layout-horizontal);*/
+        
+      }
+      #mediaDialog .selected-media-items,
+      #mediaDialog .selected-media-item{
+        /*@apply(--layout-vertical);*/
+        height:100%;
+        display:inline-block;
         box-sizing:border-box;
+        float:left;
         width:30%;
         padding:5px;
+        height:100%;
+        min-height:500px;
         background:rgba(0,0,0,0.5);
       }
       #mediaDialog .media-items{
-        @apply(--layout-horizontal);
-        @apply(--layout-wrap);
-        display:block;
+        overflow:auto;
+        /*@apply(--layout-horizontal);*/
+        /*@apply(--layout-wrap);*/
+        display:inline-block;
+        float:left;
         box-sizing:border-box;
         width:70%;
         padding:5px;
-        
+        min-height:100%;
         background:rgba(0,0,0,0.05);
+      }
+      #mediaDialog .media-items iron-selector{
+        display:block;
+        /*float:left;*/
+        width:100%;
+        height:100%;
       }
       #mediaDialog .media-items .media-item{
         box-sizing:border-box;
@@ -279,7 +313,11 @@
         text-align:center;
         width:100%;
         white-space:nowrap;
+        user-select:none;
         
+      }
+      #mediaDialog .media-items .media-item.iron-selected{
+        outline:3px solid blue;
       }
       .selected-media-item{
          text-align:center;
@@ -288,6 +326,28 @@
         
         width:100%;
         height:50%;
+      }
+      .selected-media-item .media-name{
+        @apply(--paper-font-subhead);
+        user-select:none;
+      }
+      .selected-media-items{
+        @apply(--layout-horizontal);
+        @apply(--layout-wrap);
+      }
+      .selected-media-items .media-item{
+        display:inline-block;
+        width:calc(100% / 3 - 5px);
+        height:0;
+        padding-top:calc(100% / 3 - 5px);
+        position:relative;
+      }
+      .selected-media-items iron-image{
+        position:absolute;
+        top:0;
+        left:0;
+        bottom:0;
+        right:0;
       }
       
     
@@ -660,8 +720,9 @@
         <paper-dialog id="mediaDialog" modal>
           <h2>Media Files</h2>
           <paper-dialog-scrollable>
+            <div class="scrollable-content">
             <div class="media-items">
-              <iron-selector selected="{{selectedMediaId}}" attr-for-selected="data-media-id" fallback-selection="{{__getFirstItemId(medias)}}">
+              <iron-selector multi="{{__equals(mediaSelectMode,'multiple')}}" selected="{{selectedMediaId}}" selected-values="{{selectedMediaIds}}" attr-for-selected="data-media-id" fallback-selection="{{__getFirstItemId(medias)}}">
               
             <template id="mediaRepeater" is="dom-repeat" class="repeater" items="{{medias}}" as="media" sort="{{__sort('media',searchValue)}}">
               <div class="media-item" data-media-id="{{media.id}}">
@@ -675,16 +736,32 @@
             </template>
             </iron-selector>
             </div>
-            <div class="selected-media-item">
-              <h1>{{selectedMedia.name}}</h1>
-              <iron-image preload sizing="contain" fade src="{{selectedMedia.src}}"></iron-image>
-              <div class="media-meta">
-                <div class="size">{{selectedMedia.width}} &times; {{selectedMedia.height}}</div>
-                <granite-clipboard action="copy" text="{{media.src}}"></granite-clipboard>
-              </div>
+            <template is="dom-if" if="{{__equals(mediaSelectMode,'multiple')}}">
+              <div class="selected-media-items">
+                <template is="dom-repeat" items="{{selectedMedias}}" as="media">
+                  <div class="media-item" data-media-id="{{media.id}}">
+                    <iron-image class="media-preview" sizing="contain" preload fade src="{{media.src}}"></iron-image>
+                  </div>
+                </template>
+                
+              </div>  
+            </template>
+            <template is="dom-if" if="{{__notEquals(mediaSelectMode,'multiple')}}">
+              <div class="selected-media-item">
+                <div class="media-name">{{selectedMedia.name}}</div>
+                <iron-image preload sizing="contain" fade src="{{selectedMedia.src}}"></iron-image>
+                <div class="media-meta">
+                  <div class="size">{{selectedMedia.width}} &times; {{selectedMedia.height}}</div>
+                  <granite-clipboard action="copy" text="{{selectedMedia.src}}"></granite-clipboard>
+                </div>
+              </div>  
+            </template>
             </div>
           </paper-dialog-scrollable>
-          
+          <div class="buttons">
+            <paper-button dialog-dismiss>Cancel</paper-button>
+            <paper-button dialog-confirm autofocus>Done</paper-button>
+          </div>
         </paper-dialog>
       
   </template>
@@ -736,12 +813,35 @@
         
       },
       
-      observers: ['__onRouteChange(mainRoute)','__selectedMediaIdChanged(selectedMediaId)'],
+      observers: ['__onRouteChange(mainRoute)',
+        '__selectedMediaIdChanged(selectedMediaId)',
+        '__selectedMediaIdsChanged(selectedMediaIds,selectedMediaIds.length)',
+        
+      ],
+      __equals: function( a, b  ){
+        return a == b;
+      },
+      __notEquals: function( a, b  ){
+        return a != b;
+      },
+      __selectedMediaIdsChanged: function( ids ){
+
+        var selectedItems = this.$.mediaRepeater.items.reduce( function( items, item ){
+          return ids.reduce( function( added, id ){
+            if(item.id == id ){
+              added.push( item );
+            }
+            return added;
+          }, items );
+        }, [] );
+        this.set('selectedMedias', selectedItems );
+
+      },
       __selectedMediaIdChanged: function( id ){
         // var el = document.querySelector('[data-media-id="'+id+'"]');
         // var data = .itemForElement(el);
         
-        
+        console.log(id);
         var selectedItem = this.$.mediaRepeater.items.reduce( function( found, next ){
           if( found ) return found;
           if( next.id == id ) return next;
@@ -767,6 +867,45 @@
       },
       openMediaDialog: function(){
         this.$.mediaDialog.open();
+      },
+      selectMultiMedia: function(){
+        this.mediaSelectMode = 'multiple';
+        this.selectedMedias = [];
+        this.selectedMediaIds = [];
+        this.$.mediaDialog.open();
+        return new Promise( function( resolve, reject ){
+            this.$.mediaDialog.addEventListener('iron-overlay-closed', function(e ){
+              var reason = e.detail;
+              if(reason.confirmed){
+                resolve( this.selectedMedias );  
+              }else{
+                resolve( [] );  
+              }
+              this.selectedMedias = [];
+              this.selectedMediaIds = [];
+              this.mediaSelectMode = null;
+            }.bind(this), { once: true });
+        }.bind(this))
+      },
+      selectSingleMedia: function(){
+        this.mediaSelectMode = 'single';
+        this.selectedMedia = null;
+        this.selectedMediaId = null;
+        this.$.mediaDialog.open();
+        return new Promise( function( resolve, reject ){
+            this.$.mediaDialog.addEventListener('iron-overlay-closed', function(e ){
+              var reason = e.detail;
+              if(reason.confirmed){
+                resolve( this.selectedMedia );  
+              }else{
+                resolve( [] );  
+              }
+              this.selectedMedia = [];
+              this.selectedMediaId = null;
+              this.mediaSelectMode = null;
+            }.bind(this), { once: true });
+        }.bind(this))
+        
       },
       __getFirstItemId: function( items ){
         if(!items) return null;
@@ -896,7 +1035,7 @@
             console.log('error!', e );
           }.bind(this));
         }
-        console.log('parent', parent);
+        // console.log('parent', parent);
       },
       _sortList: function( prop ) {  
         return function( a, b){
@@ -940,7 +1079,6 @@
           }.bind(this))
         }
         
-        console.log('__handleDelete', item)
       },
       __refForResource: function( resource ){
         return this.$[resource];
@@ -974,7 +1112,7 @@
             var newIndex = evt.newIndex;
             data.sortOrder = newIndex;
             container.needsUpdate = true;
-            console.log('sorted', item, newIndex, oldIndex);
+            // console.log('sorted', item, newIndex, oldIndex);
           }.bind(this)
         });    
       },
@@ -991,7 +1129,7 @@
         }.bind(it);
       },
       ready: function(){
-      
+      this.mediaSelectMode = 'multiple';
       
         var listViews = Array.prototype.slice.call(document.querySelectorAll('edb-list-view'));
         listViews.forEach( function( lv ){
@@ -1026,12 +1164,17 @@
       // this.$.product.refresh();
       this.$.category.refresh();
       // this.$.slide.refresh();
+      this.$.media.refresh();
+      
       this.__createSortable( this.$.slidesList );
       this.__createSortable( this.$.featuresList );
       this.__createSortable( this.$.inspirationsList );
       this.__createSortable( this.$.faqsList );
       
         Polymer.__notifyFailure = this.__notifyFailure.bind(this);
+        
+        Polymer.selectSingleMedia = this.selectSingleMedia.bind(this);
+        Polymer.selectMultiMedia = this.selectMultiMedia.bind(this);
       }
       
       

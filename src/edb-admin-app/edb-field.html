@@ -204,6 +204,12 @@
       #uploader input{
         display:none;
       }
+      #mediaChooser paper-button{
+        width:100%;
+        background:#000;
+        margin:10px 0;
+        color:#fff;
+      }
       
       @media all and (max-width:768px){
         #control{
@@ -331,6 +337,9 @@
             <paper-button id="uploadSingleImageButton" on-tap="__proxySingleUploadTap">choose file</paper-button>
             <input id="singleImageFileChooser" type="file" on-change="__handleFileUpload"></input>
           </div>
+          <div id="mediaChooser">
+            <paper-button id="chooseMultiImageButton" on-tap="__proxyChooseMultiMediaTap">choose media..</paper-button>
+          </div>
           </div>
           
         </template>
@@ -350,8 +359,11 @@
             </div>
           
           <div id="uploader">
-            <paper-button id="uploadMultiImageButton" on-tap="__proxyMultiUploadTap">choose files</paper-button>
+            <paper-button id="uploadMultiImageButton" on-tap="__proxyMultiUploadTap">upload files</paper-button>
             <input id="multiImageFileChooser" multiple type="file" on-change="__handleMultiFileUpload"></input>
+          </div>
+          <div id="mediaChooser">
+            <paper-button id="chooseMultiImageButton" on-tap="__proxyChooseMultiMediaTap">choose media..</paper-button>
           </div>
           </div>
           
@@ -552,6 +564,20 @@
         var parent = Polymer.dom(event).rootTarget.parentNode;
         parent.querySelector('input').click();
       
+      },
+      __proxyChooseMultiMediaTap: function(){
+        Polymer.selectMultiMedia().then( function( selectedMedias ){
+          console.log( 'selectedMedias',selectedMedias  );
+          selectedMedias.forEach( function( media ){
+            this.push('value',media)  
+          }, this )
+          
+        }.bind(this))
+      },
+      __proxyChooseSingleMediaTap: function(){
+        Polymer.selectMultiMedia().then( function( selectedMedia ){
+            this.push('value',selectedMedia )  ;
+        }.bind(this))
       },
       __setChoiceAsValue: function(event){
         
