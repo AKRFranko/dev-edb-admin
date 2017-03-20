@@ -1,5 +1,7 @@
 <link rel="import" href="../../bower_components/polymer/polymer.html">
-<!--<link rel="import" href="./users/edb-user-list.html">-->
+<!--<script src="./edb.js"></script>-->
+<!--<script src="./edb-resources.js"></script>-->
+<!--<script src="./edb-polymer.js"></script>-->
 <dom-module id="edb-admin-app">
   <template>
     <style include="edb-admin-styles"></style>
@@ -451,7 +453,7 @@
           <neon-animatable data-mode='user'>
             
             <edb-list-view id="usersList" title="Users" new-path="/#/edit/user/new" sort="{{__sort('user',searchValue)}}">
-              <template c items="{{users}}" as="user">
+              <template is="dom-repeat" items="{{users}}" as="user">
                 <edb-list-item title="{{user.name}}" image="{{user.image.src}}" edit-path="/#/edit/user/{{user.id}}" delete-path="/#/delete/user/{{user.id}}">
                   <p>{{user.email}}</p>
                 </edb-list-item>
@@ -1129,6 +1131,7 @@
         }.bind(it);
       },
       ready: function(){
+        return;
       this.mediaSelectMode = 'multiple';
       
         var listViews = Array.prototype.slice.call(document.querySelectorAll('edb-list-view'));
